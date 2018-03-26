@@ -1,21 +1,22 @@
 from time import sleep
 import signal
 import sys
+import logging
 
 
 class ProcessManager(object):
     def __init__(self):
-        pass
+        self.logger = logging.getLogger(__name__)
 
     def run(self):
         self.listen_stop_signal()
 
         while True:
-            print 'Working..'
+            self.logger.info('Working...')
             sleep(1)
 
     def on_stop_handler(self, signum, frame):
-        print 'Exiting application...'
+        self.logger.info('Gracefully stopping...')
         sys.exit(0)
 
     def listen_stop_signal(self):
