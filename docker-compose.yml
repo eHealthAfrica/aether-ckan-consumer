@@ -4,5 +4,5 @@ services:
     build: .
     env_file:
       - .env
-  redis:
-    image: "redis:alpine"
+  # redis:
+  #   image: "redis:alpine"
