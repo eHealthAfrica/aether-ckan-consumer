@@ -1,8 +1,8 @@
-version: '3'
+version: "3"
 services:
   app:
     build: .
-    environment:
-      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
   redis:
     image: "redis:alpine"
