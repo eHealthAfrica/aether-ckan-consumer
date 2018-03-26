@@ -10,7 +10,11 @@ CKAN portals with data in the Datastore.
 The project is setup with Docker. It will spin up an environment with
 Python 2.7 based on Alpine and install the required dependencies.
 
-To run the app just type `docker-compose up`.
+To run the app just type:
+
+```
+docker-compose up
+```
 
 ### Running the tests
 
