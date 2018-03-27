@@ -16,6 +16,69 @@ To run the app just type:
 docker-compose up
 ```
 
+### Configuration
+
+The Consumer can be configured via `config.json`. This is a sample of its shape
+and data:
+
+```json
+{
+    "kafka": {
+        "url": ""
+    },
+    "ckan_servers": [
+        {
+            "name": "CKAN Demo portal",
+            "url": "https://example.com",
+            "api_key": "a526aab5-9655-4d75-b046-dfd0d060gtyu",
+            "datasets": [
+                {
+                    "name": "some-dataset",
+                    "topics": [
+                        {
+                            "name": "some-topic",
+                            "number_of_consumers": 2
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
+
+Available options are:
+
+- `kafka`: Object storing information for Kafka.
+- `kafka.url`: The URL where Kafka is running.
+- `ckan_servers`: Array of CKAN server instances.
+- `ckan_servers.name`: Name of the CKAN server instance, usually a title.
+- `ckan_servers.url`: The URL where the CKAN server instance is running.
+- `ckan_servers.api_key`: The API key used for making API calls to a CKAN
+server instance.
+- `ckan_servers.datasets`: Array of datasets to feed data with for the CKAN
+server instance.
+- `ckan_servers.datasets.name`: Name of the dataset. For instance, for this
+dataset https://example.com/dataset/test-api, the name of the dataset is
+*test-api*
+- `ckan_servers.datasets.topics`: Array of topics to poll data from for a
+dataset.
+- `ckan_servers.datasets.topics.name`: Name of the topic in Kafka.
+- `ckan_servers.datasets.topics.number_of_consumers`: Number of consumers to
+instantiate for the speicified topic.
+
+This configuration file is validates against `config.schema`, which is a JSON
+Schema file. This makes sure that data in the `config.json` file is valid, as
+well as its shape.
+
+### Environment variables
+
+In `.env`, the following variables can be changed:
+
+- `PYTHONUNBUFFERED`: Used for Docker logging. If set to 1, log messages from
+Python will be buffered, so that the terminal is not flooded with messages.
+For development, it's better to keep this set to 0.
+
 ### Running the tests
 
 To run the tests type the following command which also checks for PEP8 errors:
