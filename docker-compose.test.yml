@@ -1,0 +1,10 @@
+version: "3"
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    env_file:
+      - .env
+  # redis:
+  #   image: "redis:alpine"
