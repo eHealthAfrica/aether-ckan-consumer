@@ -9,7 +9,7 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
 
-PROCESS_ACTIVE_TIMEOUT = int(os.getenv('PROCESS_ACTIVE_TIMEOUT', 1))
+PROCESS_ACTIVE_TIMEOUT = 1
 
 
 class ProcessManager(object):
@@ -30,7 +30,7 @@ class ProcessManager(object):
         config = self.validate_config(dir_path, config_file, schema_file)
 
         # This is a method that blocks the main thread where the application
-        # wa started. It must always be at the bottom of the run() method.
+        # was started. It must always be at the bottom of the run() method.
         self.keep_process_active()
 
     def keep_process_active(self):
