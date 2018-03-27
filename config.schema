@@ -1,0 +1,46 @@
+{
+    "type": "object",
+    "properties": {
+        "kafka": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string"}
+            },
+            "required": ["url"]
+        },
+        "ckan_servers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "url": {"type": "string"},
+                    "api_key": {"type": "string"},
+                    "datasets": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "topics": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {"type": "string"},
+                                            "number_of_consumers": {"type": "number"}
+                                        },
+                                        "required": ["name", "number_of_consumers"]
+                                    }
+                                }
+                            },
+                            "required": ["name", "topics"]
+                        }
+                    }
+                },
+                "required": ["name", "url", "api_key", "datasets"]
+            }
+        }
+    },
+    "required": ["kafka"]
+}

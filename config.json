@@ -1,0 +1,23 @@
+{
+    "kafka": {
+        "url": ""
+    },
+    "ckan_servers": [
+        {
+            "name": "CKAN Demo portal",
+            "url": "https://demo.ckan.org",
+            "api_key": "a526aab5-9655-4d75-b046-dfd0d060ad21",
+            "datasets": [
+                {
+                    "name": "some-dataset",
+                    "topics": [
+                        {
+                            "name": "some-topic",
+                            "number_of_consumers": 2
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
