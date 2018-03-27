@@ -18,21 +18,8 @@ docker-compose up
 
 ### Running the tests
 
-To run the tests, first make sure that you have installed the required
-development dependencies, which can be done by running the following command:
+To run the tests type the following command which also checks for PEP8 errors:
 
 ```
-pip install -r dev-requirements.txt
-```
-
-After that just type this command to actually run the tests:
-
-```
-nosetests
-```
-
-To run the tests and produce a coverage report type this command:
-
-```
-nosetests --with-coverage --cover-tests --cover-inclusive --cover-erase
+docker-compose -f docker-compose.test.yml up --build
 ```
