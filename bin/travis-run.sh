@@ -1,3 +1,5 @@
 #!/bin/sh -e
 
-nosetests --with-coverage --cover-tests --cover-inclusive --cover-erase
+nosetests ./tests --with-coverage --cover-tests --cover-inclusive --cover-erase
+
+pycodestyle .
