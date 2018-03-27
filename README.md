@@ -24,7 +24,7 @@ and data:
 ```json
 {
     "kafka": {
-        "url": ""
+        "url": "kafka:23897"
     },
     "ckan_servers": [
         {
@@ -59,15 +59,17 @@ server instance.
 - `ckan_servers.datasets`: Array of datasets to feed data with for the CKAN
 server instance.
 - `ckan_servers.datasets.name`: Name of the dataset. For instance, for this
-dataset https://example.com/dataset/test-api, the name of the dataset is
-*test-api*
+dataset https://example.com/dataset/dataset-name, the name of the dataset is
+*dataset-name*.
 - `ckan_servers.datasets.topics`: Array of topics to poll data from for a
 dataset.
 - `ckan_servers.datasets.topics.name`: Name of the topic in Kafka.
 - `ckan_servers.datasets.topics.number_of_consumers`: Number of consumers to
-instantiate for the speicified topic.
+instantiate for the specified topic. Usually this should be set to 1, but if
+the volume of data that comes from a topic increases, it should be bumped.
+(Default: 1)
 
-This configuration file is validates against `config.schema`, which is a JSON
+This configuration file is validated against `config.schema`, which is a JSON
 Schema file. This makes sure that data in the `config.json` file is valid, as
 well as its shape.
 
@@ -75,9 +77,9 @@ well as its shape.
 
 In `.env`, the following variables can be changed:
 
-- `PYTHONUNBUFFERED`: Used for Docker logging. If set to 1, log messages from
-Python will be buffered, so that the terminal is not flooded with messages.
-For development, it's better to keep this set to 0.
+- `PYTHONUNBUFFERED`: Useful for debugging in development. It forces stdin,
+stdout and stderr to be totally unbuffered. It should be set to any value in
+order to work.
 
 ### Running the tests
 
