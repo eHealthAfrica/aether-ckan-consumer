@@ -1,2 +1,5 @@
 *.pyc
 .coverage
+
+/venv
+/local
