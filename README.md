@@ -80,6 +80,8 @@ In `.env`, the following variables can be changed:
 - `PYTHONUNBUFFERED`: Useful for debugging in development. It forces stdin,
 stdout and stderr to be totally unbuffered. It should be set to any value in
 order to work.
+- `ENVIRONMENT`: Can be set to *development* or *production*. Default is
+*development*.
 
 ### Running the tests
 
