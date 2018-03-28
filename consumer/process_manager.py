@@ -10,6 +10,7 @@ from jsonschema.exceptions import ValidationError
 
 
 PROCESS_ACTIVE_TIMEOUT = 1
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 
 
 class ProcessManager(object):
@@ -29,9 +30,11 @@ class ProcessManager(object):
 
         config = self.validate_config(dir_path, config_file, schema_file)
 
-        # This is a method that blocks the main thread where the application
-        # was started. It must always be at the bottom of the run() method.
-        self.keep_process_active()
+        if ENVIRONMENT == 'production':
+            # This is a method that blocks the main thread where the
+            # application was started. It must always be at the bottom of the
+            # run() method.
+            self.keep_process_active()
 
     def keep_process_active(self):
         ''' Keeps the process active until stop signal is caught which
@@ -90,6 +93,9 @@ class ProcessManager(object):
         :type file_name: string
 
         :raises ValueError, TypeError: If the file cannot be parsed as JSON.
+
+        :returns: The contents of the file as JSON.
+        :rtype: dictionary
 
         '''
 
