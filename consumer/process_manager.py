@@ -8,6 +8,8 @@ import json
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
+from server_manager import ServerManager
+
 
 PROCESS_ACTIVE_TIMEOUT = 1
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
@@ -30,7 +32,11 @@ class ProcessManager(object):
 
         config = self.validate_config(dir_path, config_file, schema_file)
 
-        if ENVIRONMENT == 'production':
+        self.spawn_server_managers(config)
+
+        # If tests are running the main thread should not be active, otherwise
+        # they won't run.
+        if ENVIRONMENT != 'test':
             # This is a method that blocks the main thread where the
             # application was started. It must always be at the bottom of the
             # run() method.
@@ -65,7 +71,7 @@ class ProcessManager(object):
         :param file_name: The name of the file to read from.
         :type file_name: string
 
-        :raises IOError: If the file cannot be found from provided directory
+        :raises SystemExit: If the file cannot be found from provided directory
         path and file name.
 
         :returns: The contents of the file.
@@ -92,7 +98,7 @@ class ProcessManager(object):
         :param file_name: The name of the file to read from.
         :type file_name: string
 
-        :raises ValueError, TypeError: If the file cannot be parsed as JSON.
+        :raises SystemExit: If the file cannot be parsed as JSON.
 
         :returns: The contents of the file as JSON.
         :rtype: dictionary
@@ -120,7 +126,7 @@ class ProcessManager(object):
         :param schema_file: The JSON Schema file to use for validation.
         :type schema_file: string
 
-        :raises ValidationError: If the config file is not valid according to
+        :raises SystemExit: If the config file is not valid according to
         the JSON Schema file.
 
         :returns: The config file as JSON.
@@ -140,3 +146,18 @@ class ProcessManager(object):
             sys.exit(1)
 
         return config
+
+    def spawn_server_managers(self, config):
+        ''' Spawns Server Managers based on the config.
+
+        :param config: Configuration based on config.json.
+        :type config: dictionary
+
+        '''
+
+        servers = config.get('ckan_servers')
+        self.server_managers = []
+
+        for server in servers:
+            server_manager = ServerManager(server)
+            self.server_managers.append(server_manager)
