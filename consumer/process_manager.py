@@ -158,6 +158,13 @@ class ProcessManager(object):
         servers = config.get('ckan_servers')
         self.server_managers = []
 
-        for server in servers:
-            server_manager = ServerManager(server)
-            self.server_managers.append(server_manager)
+        for server_config in servers:
+            server_manager = ServerManager(server_config)
+
+            server_available = server_manager.check_server_availability(
+                server_config
+            )
+
+            if server_available:
+                self.server_managers.append(server_manager)
+                server_manager.spawn_dataset_managers(server_config)
