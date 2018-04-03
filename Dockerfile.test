@@ -1,5 +1,7 @@
 FROM python:2.7-alpine
 
+ENV ENVIRONMENT=test
+
 RUN apk update && \
     apk add --no-cache \
         bash \
@@ -16,7 +18,7 @@ WORKDIR code
 RUN pip install -r requirements.txt
 RUN pip install -r dev-requirements.txt
 
-RUN pycodestyle .
+RUN pycodestyle ./consumer
 
-CMD ["nosetests", "./tests", "--with-coverage", "--cover-tests", "--cover-inclusive", "--cover-erase"]
+CMD ["nosetests", "./tests"]
 
