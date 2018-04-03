@@ -2,6 +2,7 @@ import unittest
 import os
 
 from mock import Mock
+import responses
 
 from consumer.process_manager import ProcessManager
 from consumer.server_manager import ServerManager
@@ -84,11 +85,26 @@ class TestProcessManager(unittest.TestCase):
                 schema_file
             )
 
+    @responses.activate
     def test_spawn_server_managers(self):
+        responses.add(
+            responses.GET,
+            'http://ckan-server1.com/api/action/status_show',
+            json={'success': True},
+            status=200
+        )
+
+        responses.add(
+            responses.GET,
+            'http://ckan-server2.com/api/action/status_show',
+            json={'success': True},
+            status=200
+        )
+
         config = {
             'ckan_servers': [
-                {'url': 'https://demo.ckan.org', 'datasets': []},
-                {'url': 'https://beta.ckan.org', 'datasets': []}
+                {'url': 'http://ckan-server1.com', 'datasets': []},
+                {'url': 'http://ckan-server2.com', 'datasets': []}
             ]
         }
 
@@ -98,3 +114,31 @@ class TestProcessManager(unittest.TestCase):
             len(config.get('ckan_servers'))
         assert type(self.process_manager.server_managers[0]) is ServerManager
         assert type(self.process_manager.server_managers[1]) is ServerManager
+
+    @responses.activate
+    def test_spawn_server_managers_with_404(self):
+        responses.add(
+            responses.GET,
+            'http://ckan-server1.com/api/action/status_show',
+            json={'success': True},
+            status=200
+        )
+
+        responses.add(
+            responses.GET,
+            'http://ckan-server2.com/api/action/status_show',
+            json={'success': True},
+            status=404
+        )
+
+        config = {
+            'ckan_servers': [
+                {'url': 'http://ckan-server1.com', 'datasets': []},
+                {'url': 'http://ckan-server2.com', 'datasets': []}
+            ]
+        }
+
+        self.process_manager.spawn_server_managers(config)
+
+        assert len(self.process_manager.server_managers) == 1
+        assert type(self.process_manager.server_managers[0]) is ServerManager
