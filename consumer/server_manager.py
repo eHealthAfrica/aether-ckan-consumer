@@ -13,25 +13,23 @@ CONN_RETRY_WAIT_TIME = 1
 
 class ServerManager(object):
 
-    def __init__(self, server):
+    def __init__(self, server_config):
         self.logger = logging.getLogger(__name__)
-        self.server = server
+        self.server_config = server_config
 
-        server_available = self.check_server_availability()
-
-        if server_available:
-            self.spawn_dataset_managers(self.server)
-
-    def check_server_availability(self):
+    def check_server_availability(self, server_config):
         ''' Checks the server availability using CKAN's API action
         "status_show". Retry logic exist with a wait time between retries.
+
+        :param server_config: The configuration for the server.
+        :type server_config: dictionary
 
         :returns: Is server available.
         :rtype: boolean
 
         '''
 
-        server_url = self.server.get('url')
+        server_url = server_config.get('url')
         url = '{0}/api/action/status_show'.format(server_url)
         response = None
 
@@ -63,10 +61,17 @@ class ServerManager(object):
             self.logger.info('Server {0} available.'.format(url))
             return True
 
-    def spawn_dataset_managers(self, server):
-        ''' Spawns Server Managers based on the config. '''
+        return False
 
-        datasets = server.get('datasets')
+    def spawn_dataset_managers(self, server_config):
+        ''' Spawns Server Managers based on the config.
+
+        :param server_config: The configuration for the server.
+        :type server_config: dictionary
+
+        '''
+
+        datasets = server_config.get('datasets')
         self.dataset_managers = []
 
         for dataset in datasets:
