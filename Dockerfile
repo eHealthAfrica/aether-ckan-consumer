@@ -15,4 +15,4 @@ WORKDIR code
 
 RUN pip install -r requirements.txt
 
-CMD ["python", "consumer/main.py"]
+CMD ["python", "-m", "consumer.main"]
