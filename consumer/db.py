@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
-from config import get_config
+from consumer.config import get_config
 
 Base = declarative_base()
 logger = logging.getLogger(__name__)

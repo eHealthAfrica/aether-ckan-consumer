@@ -1,9 +1,9 @@
 import logging
 import os
 
-from core.process_manager import ProcessManager
-from config import validate_config
-import db
+from consumer.core.process_manager import ProcessManager
+from consumer.config import validate_config
+from consumer import db
 
 
 logging.basicConfig(

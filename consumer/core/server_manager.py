@@ -4,7 +4,7 @@ import logging
 import requests
 from requests.exceptions import ConnectionError
 
-from dataset_manager import DatasetManager
+from consumer.core.dataset_manager import DatasetManager
 
 
 CONN_RETRY = 3

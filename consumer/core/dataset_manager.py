@@ -3,7 +3,7 @@ from threading import Thread
 
 import requests
 
-from topic_manager import TopicManager
+from consumer.core.topic_manager import TopicManager
 
 
 class DatasetManager(Thread):

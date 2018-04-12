@@ -10,7 +10,7 @@ from kafka import errors as KafkaErrors
 from avro.datafile import DataFileReader
 from avro.io import DatumReader
 
-from config import get_config
+from consumer.config import get_config
 
 CONN_RETRY = 3
 CONN_RETRY_WAIT_TIME = 2

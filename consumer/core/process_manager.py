@@ -2,8 +2,8 @@ import signal
 import sys
 import logging
 
-from server_manager import ServerManager
-from config import get_config
+from consumer.core.server_manager import ServerManager
+from consumer.config import get_config
 
 
 class ProcessManager(object):
