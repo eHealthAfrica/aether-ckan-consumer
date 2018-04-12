@@ -1,6 +1,13 @@
 {
     "type": "object",
     "properties": {
+        "database": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string"}
+            },
+            "required": ["url"]
+        },
         "kafka": {
             "type": "object",
             "properties": {
@@ -13,7 +20,7 @@
             "items": {
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string"},
+                    "title": {"type": "string"},
                     "url": {"type": "string"},
                     "api_key": {"type": "string"},
                     "datasets": {
@@ -21,24 +28,50 @@
                         "items": {
                             "type": "object",
                             "properties": {
-                                "name": {"type": "string"},
-                                "topics": {
+                                "metadata": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {"type": "string"},
+                                        "name": {"type": "string"},
+                                        "owner_org": {"type": "string"}
+                                    },
+                                    "required": ["title", "name", "owner_org"]
+                                },
+                                "resources": {
                                     "type": "array",
                                     "items": {
                                         "type": "object",
                                         "properties": {
-                                            "name": {"type": "string"},
-                                            "number_of_consumers": {"type": "number"}
-                                        },
-                                        "required": ["name", "number_of_consumers"]
-                                    }
+                                            "metadata": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "title": {"type": "string"},
+                                                    "description": {"type": "string"},
+                                                    "name": {"type": "string"}
+                                                },
+                                                "required": ["title", "description", "name"]
+                                            },
+                                            "topics": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {"type": "string"},
+                                                        "number_of_consumers": {"type": "number"}
+                                                    },
+                                                    "required": ["name", "number_of_consumers"]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": ["metadata", "topics"]
                                 }
                             },
-                            "required": ["name", "topics"]
+                            "required": ["metadata", "resources"]
                         }
                     }
                 },
-                "required": ["name", "url", "api_key", "datasets"]
+                "required": ["title", "url", "api_key", "datasets"]
             }
         }
     },
