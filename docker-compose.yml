@@ -4,5 +4,9 @@ services:
     build: .
     env_file:
       - .env
+    # Temporary set to enable access to local Kafka from outside the container
+    network_mode: "host"
+    volumes:
+      - ./db/:/root/db/
   # redis:
   #   image: "redis:alpine"
