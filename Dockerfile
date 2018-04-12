@@ -9,10 +9,13 @@ RUN apk update && \
         musl-dev \
         openssl-dev
 
-ADD . /code
+WORKDIR /srv/app
 
-WORKDIR code
+# This avoids reinstalling Python packages each time the image is rebuilt
+ADD ./requirements.txt /srv/app/requirements.txt
 
 RUN pip install -r requirements.txt
+
+ADD . /srv/app
 
 CMD ["python", "-m", "consumer.main"]
