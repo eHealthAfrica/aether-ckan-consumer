@@ -100,14 +100,12 @@ class TestServerManager(unittest.TestCase):
 
     def test_spawn_dataset_managers(self):
         config = {
-            'datasets': [
-                {'name': 'some-dataset-1', 'topics': []},
-                {'name': 'some-dataset-2', 'topics': []},
-            ]
+            'datasets': [{
+                'resources': []
+            }]
         }
 
         self.server_manager.spawn_dataset_managers(config)
 
-        assert len(self.server_manager.dataset_managers) == 2
+        assert len(self.server_manager.dataset_managers) == 1
         assert type(self.server_manager.dataset_managers[0]) is DatasetManager
-        assert type(self.server_manager.dataset_managers[1]) is DatasetManager
