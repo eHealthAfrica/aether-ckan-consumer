@@ -1,7 +1,2 @@
 *.pyc
-.coverage
-
-/venv
-/local
-
 /db
