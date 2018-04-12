@@ -18,9 +18,9 @@ if __name__ == '__main__':
 
     dir_path = os.getcwd()
 
-    # Located in the root directory
-    config_file = 'config.json'
-    schema_file = 'config.schema'
+    # Located in the config directory
+    config_file = os.path.join('config', 'config.json')
+    schema_file = os.path.join('config', 'config.schema')
 
     validate_config(dir_path, config_file, schema_file)
 

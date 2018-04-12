@@ -1,6 +1,6 @@
 {
     "database": {
-        "url": "sqlite:////root/db/consumer.db"
+        "url": "sqlite:////srv/app/db/consumer.db"
     },
     "kafka": {
         "url": "localhost:9092"
