@@ -2,8 +2,8 @@ import unittest
 
 import responses
 
-from consumer.server_manager import ServerManager
-from consumer.dataset_manager import DatasetManager
+from consumer.core.server_manager import ServerManager
+from consumer.core.dataset_manager import DatasetManager
 
 
 class TestServerManager(unittest.TestCase):

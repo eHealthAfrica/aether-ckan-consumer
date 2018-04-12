@@ -8,7 +8,7 @@ from dataset_manager import DatasetManager
 
 
 CONN_RETRY = 3
-CONN_RETRY_WAIT_TIME = 1
+CONN_RETRY_WAIT_TIME = 2
 
 
 class ServerManager(object):
@@ -75,5 +75,22 @@ class ServerManager(object):
         self.dataset_managers = []
 
         for dataset in datasets:
-            dataset_manager = DatasetManager(dataset)
+            config = {
+                'ckan_url': server_config.get('url'),
+                'server_name': server_config.get('title'),
+                'api_key': server_config.get('api_key'),
+                'dataset': dataset,
+            }
+            dataset_manager = DatasetManager(config)
             self.dataset_managers.append(dataset_manager)
+
+        if len(self.dataset_managers) == 0:
+            self.logger.info('No Dataset Managers spawned.')
+        else:
+            self.logger.info(
+                'Spawned {0} Dataset manager(s) for server {1}.'
+                .format(len(self.dataset_managers), server_config.get('name'))
+            )
+
+        for dataset_manager in self.dataset_managers:
+            dataset_manager.start()
