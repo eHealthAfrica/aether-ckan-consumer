@@ -69,4 +69,3 @@ class TestConfig(unittest.TestCase):
 
         assert type(config) is dict
         assert config.get('foo') == 1
-
