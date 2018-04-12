@@ -7,6 +7,6 @@ services:
     # Temporary set to enable access to local Kafka from outside the container
     network_mode: "host"
     volumes:
-      - ./db/:/root/db/
+      - ./db/:/srv/app/db/
   # redis:
   #   image: "redis:alpine"
