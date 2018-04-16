@@ -11,7 +11,7 @@ RUN apk update && \
 
 WORKDIR /srv/app
 
-# This avoids reinstalling Python packages each time the image is rebuilt
+# This avoids reinstalling Python packages each time the image is rebuilt.
 ADD ./requirements.txt /srv/app/requirements.txt
 
 RUN pip install -r requirements.txt
