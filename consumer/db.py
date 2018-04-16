@@ -9,15 +9,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
-from consumer.config import get_config
-
 Base = declarative_base()
 logger = logging.getLogger(__name__)
 session = None
+engine = None
 
 
-def init():
-    url = get_config().get('database').get('url')
+def init(url):
+    global engine
     engine = create_engine(url)
 
     try:
@@ -34,6 +33,10 @@ def init():
 
 def get_session():
     return session
+
+
+def get_engine():
+    return engine
 
 
 class Resource(Base):
