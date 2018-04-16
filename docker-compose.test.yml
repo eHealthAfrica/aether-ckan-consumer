@@ -4,5 +4,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
-  # redis:
-  #   image: "redis:alpine"
+    volumes:
+      - ./db/:/srv/app/db/
