@@ -2,7 +2,7 @@ import logging
 import os
 
 from consumer.core.process_manager import ProcessManager
-from consumer.config import validate_config
+from consumer.config import validate_config, get_config
 from consumer import db
 
 
@@ -24,7 +24,8 @@ if __name__ == '__main__':
 
     validate_config(dir_path, config_file, schema_file)
 
-    db.init()
+    url = get_config().get('database').get('url')
+    db.init(url)
 
     print db.get_session()
 
