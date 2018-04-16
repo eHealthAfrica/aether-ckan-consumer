@@ -13,7 +13,7 @@ RUN apk update && \
 
 WORKDIR /srv/app
 
-# This avoids reinstalling Python packages each time the image is rebuilt
+# This avoids reinstalling Python packages each time the image is rebuilt.
 ADD ./requirements.txt /srv/app/requirements.txt
 ADD ./dev-requirements.txt /srv/app/dev-requirements.txt
 
@@ -24,5 +24,5 @@ ADD . /srv/app
 
 RUN pycodestyle ./consumer
 
-CMD ["nosetests", "./tests"]
+CMD ["nosetests", "./tests", "--nocapture"]
 
