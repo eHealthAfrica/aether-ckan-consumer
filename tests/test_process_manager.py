@@ -5,6 +5,7 @@ import responses
 
 from consumer.core.process_manager import ProcessManager
 from consumer.core.server_manager import ServerManager
+from consumer import db
 
 
 class TestProcessManager(unittest.TestCase):
@@ -13,6 +14,10 @@ class TestProcessManager(unittest.TestCase):
         super(TestProcessManager, self).__init__(*args, **kwargs)
 
         self.process_manager = ProcessManager()
+
+    def setUp(self):
+        url = 'sqlite:////srv/app/db/test.db'
+        db.init(url)
 
     def test_run(self):
         self.process_manager.listen_stop_signal = Mock()
