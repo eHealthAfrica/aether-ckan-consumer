@@ -1,6 +1,7 @@
 from time import sleep
 import logging
 import sys
+import os
 
 import requests
 from requests.exceptions import ConnectionError
@@ -8,6 +9,7 @@ from ckanapi import RemoteCKAN
 from ckanapi import errors as ckanapi_errors
 
 from consumer.core.dataset_manager import DatasetManager
+from consumer.config import parse_json_from_file
 
 
 CONN_RETRY = 3
@@ -105,23 +107,18 @@ class ServerManager(object):
         api_key = server_config.get('api_key')
         metadata = dataset_config.get('metadata')
         dataset_name = metadata.get('name')
-        data = {
-            'title': metadata.get('title'),
-            'name': dataset_name,
-            'description': metadata.get('description'),
-            'owner_org': metadata.get('owner_org'),
-        }
 
         ckan = RemoteCKAN(server_url, apikey=api_key)
 
         try:
-            ckan.action.package_show(id=data.get('name'))
+            ckan.action.package_show(id=dataset_name)
             return
         except ckanapi_errors.NotFound:
             # Dataset does not exist, so continue with execution to create it.
             pass
 
         try:
+            data = self.update_metadata_from_defaults(metadata)
             dataset = ckan.action.package_create(**data)
             dataset_url = '{0}/dataset/{1}'.format(server_url, dataset_name)
             self.logger.info('Dataset {0} created in CKAN portal {1}: {2}.'
@@ -147,3 +144,15 @@ class ServerManager(object):
                 )
             )
             sys.exit(1)
+
+    def update_metadata_from_defaults(self, overwritten_data):
+        dir_path = os.getcwd()
+        file_name = os.path.join('config', 'dataset_metadata.json')
+
+        default_metadata = parse_json_from_file(dir_path, file_name)
+
+        updated_metadata = {}
+        updated_metadata.update(default_metadata)
+        updated_metadata.update(overwritten_data)
+
+        return updated_metadata
