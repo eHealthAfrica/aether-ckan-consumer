@@ -1,8 +1,6 @@
 import logging
 from threading import Thread
 
-import requests
-
 from consumer.core.topic_manager import TopicManager
 
 
@@ -15,11 +13,7 @@ class DatasetManager(Thread):
         self.config = config
 
     def run(self):
-        self.create_dataset_if_not_exists()
         self.spawn_topic_managers()
-
-    def create_dataset_if_not_exists(self):
-        pass
 
     def spawn_topic_managers(self):
         dataset = self.config.get('dataset')
