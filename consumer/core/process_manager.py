@@ -4,6 +4,7 @@ import logging
 
 from consumer.core.server_manager import ServerManager
 from consumer.config import get_config
+from consumer.db import CkanServer
 
 
 class ProcessManager(object):
@@ -51,6 +52,14 @@ class ProcessManager(object):
             if server_available:
                 self.server_managers.append(server_manager)
                 server_manager.spawn_dataset_managers(server_config)
+
+                ckan_server_url = server_config.get('url')
+                ckan_server = CkanServer.get_by_url(
+                    ckan_server_url=ckan_server_url
+                )
+
+                if not ckan_server:
+                    CkanServer.create(ckan_server_url=ckan_server_url)
 
         if len(self.server_managers) == 0:
             self.logger.error('No CKAN servers available.')
