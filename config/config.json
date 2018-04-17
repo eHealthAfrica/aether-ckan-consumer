@@ -14,9 +14,9 @@
                 {
                     "metadata": {
                         "title": "Pollution in Germany",
-                        "name": "pollution-in-germany1",
+                        "name": "pollution-in-germany111",
                         "owner_org": "dsvre",
-                        "description": "Some description",
+                        "notes": "Some description",
                         "author": "Field overriden from default_metadata.json"
                     },
                     "resources": [

@@ -33,10 +33,10 @@
                                     "properties": {
                                         "title": {"type": "string"},
                                         "name": {"type": "string"},
-                                        "description": {"type": "string"},
+                                        "notes": {"type": "string"},
                                         "owner_org": {"type": "string"}
                                     },
-                                    "required": ["title", "name", "description", "owner_org"]
+                                    "required": ["title", "name", "notes", "owner_org"]
                                 },
                                 "resources": {
                                     "type": "array",

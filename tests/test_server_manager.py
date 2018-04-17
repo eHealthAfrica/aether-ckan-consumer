@@ -127,7 +127,7 @@ class TestServerManager(unittest.TestCase):
                 'metadata': {
                     'title': 'Some title',
                     'name': 'Some name',
-                    'description': 'Some description',
+                    'notes': 'Some description',
                 },
                 'resources': [],
             }]
