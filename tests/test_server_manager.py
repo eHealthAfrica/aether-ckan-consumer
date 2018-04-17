@@ -98,10 +98,38 @@ class TestServerManager(unittest.TestCase):
 
         assert server_available is False
 
+    @responses.activate
     def test_spawn_dataset_managers(self):
+        data = {
+            'error': {
+                'message': 'Not found',
+                '__type': 'Not Found Error'
+            }
+        }
+
+        responses.add(
+            responses.POST,
+            'http://ckan-server1.com/api/action/package_show',
+            json=data,
+            status=200
+        )
+
+        responses.add(
+            responses.POST,
+            'http://ckan-server1.com/api/action/package_create',
+            json={'success': True, 'result': {}},
+            status=200
+        )
+
         config = {
+            'url': 'http://ckan-server1.com',
             'datasets': [{
-                'resources': []
+                'metadata': {
+                    'title': 'Some title',
+                    'name': 'Some name',
+                    'description': 'Some description',
+                },
+                'resources': [],
             }]
         }
 
