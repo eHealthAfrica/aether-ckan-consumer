@@ -86,9 +86,9 @@ class ServerManager(object):
                 'api_key': server_config.get('api_key'),
                 'dataset': dataset,
             }
+            self.create_dataset_in_ckan(server_config, dataset)
             dataset_manager = DatasetManager(config)
             self.dataset_managers.append(dataset_manager)
-            self.create_dataset_in_ckan(server_config, dataset)
 
         if len(self.dataset_managers) == 0:
             self.logger.info('No Dataset Managers spawned.')
