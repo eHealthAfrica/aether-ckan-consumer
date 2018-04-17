@@ -8,14 +8,15 @@
     "ckan_servers": [
         {
             "title": "CKAN Demo portal",
-            "url": "https://demo.ckan.org",
-            "api_key": "a526aab5-9655-4d75-b046-dfd0d060ad21",
+            "url": "http://localhost:5000",
+            "api_key": "e7b4d292-f282-44d2-b40e-34d753fd22b3",
             "datasets": [
                 {
                     "metadata": {
                         "title": "Pollution in Germany",
-                        "name": "pollution-in-germany",
-                        "owner_org": "name or id of the owner org",
+                        "name": "pollution-in-germany1",
+                        "owner_org": "dsvre",
+                        "description": "Some description",
                         "author": "Field overriden from default_metadata.json"
                     },
                     "resources": [

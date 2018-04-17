@@ -27,7 +27,5 @@ if __name__ == '__main__':
     url = get_config().get('database').get('url')
     db.init(url)
 
-    print db.get_session()
-
     processManager = ProcessManager()
     processManager.run()

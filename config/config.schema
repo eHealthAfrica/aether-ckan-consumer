@@ -33,9 +33,10 @@
                                     "properties": {
                                         "title": {"type": "string"},
                                         "name": {"type": "string"},
+                                        "description": {"type": "string"},
                                         "owner_org": {"type": "string"}
                                     },
-                                    "required": ["title", "name", "owner_org"]
+                                    "required": ["title", "name", "description", "owner_org"]
                                 },
                                 "resources": {
                                     "type": "array",
