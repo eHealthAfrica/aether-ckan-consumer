@@ -9,12 +9,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import scoped_session
 
 Base = declarative_base()
 logger = logging.getLogger(__name__)
-session = None
 engine = None
+Session = None
 
 
 def init(url):
@@ -23,11 +22,10 @@ def init(url):
 
     try:
         Base.metadata.create_all(engine)
-        session_factory = sessionmaker(bind=engine)
-        Session = scoped_session(session_factory)
 
-        global session
-        session = Session()
+        global Session
+        Session = sessionmaker(bind=engine)
+
         logger.info('Database initialized.')
     except SQLAlchemyError:
         logger.error('Database could not be initialized.')
@@ -35,7 +33,7 @@ def init(url):
 
 
 def get_session():
-    return session
+    return Session()
 
 
 def get_engine():
@@ -58,6 +56,7 @@ class Resource(Base):
     @classmethod
     def create(cls, **kwargs):
         resource = cls(**kwargs)
+        session = get_session()
 
         session.add(resource)
         session.commit()
@@ -66,6 +65,7 @@ class Resource(Base):
 
     @classmethod
     def get_by_name(cls, resource_name):
+        session = get_session()
         resource = session.query(cls).filter_by(
             resource_name=resource_name
         ).first()
@@ -83,6 +83,7 @@ class CkanServer(Base):
     def create(cls, ckan_server_url):
         ckan_server = cls(ckan_server_url=ckan_server_url)
 
+        session = get_session()
         session.add(ckan_server)
         session.commit()
 
@@ -90,6 +91,7 @@ class CkanServer(Base):
 
     @classmethod
     def get_by_url(cls, ckan_server_url):
+        session = get_session()
         ckan_server = session.query(cls).filter_by(
             ckan_server_url=ckan_server_url
         ).first()
