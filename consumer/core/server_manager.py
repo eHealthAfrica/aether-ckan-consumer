@@ -95,7 +95,7 @@ class ServerManager(object):
         else:
             self.logger.info(
                 'Spawned {0} Dataset manager(s) for server {1}.'
-                .format(len(self.dataset_managers), server_config.get('name'))
+                .format(len(self.dataset_managers), server_config.get('title'))
             )
 
         for dataset_manager in self.dataset_managers:

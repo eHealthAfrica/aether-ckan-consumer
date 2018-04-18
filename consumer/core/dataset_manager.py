@@ -39,7 +39,7 @@ class DatasetManager(Thread):
                 for i in range(number_of_consumers):
                     config = {
                         'server_name': self.config.get('server_name'),
-                        'dataset_name': dataset.get('name'),
+                        'dataset_name': dataset_name,
                         'topic': topic_config,
                     }
                     topic_manager = TopicManager(config)
@@ -50,7 +50,7 @@ class DatasetManager(Thread):
             else:
                 self.logger.info(
                     'Spawned {0} Topic manager(s) for dataset {1}.'
-                    .format(len(self.topic_managers), dataset.get('name'))
+                    .format(len(self.topic_managers), dataset_name)
                 )
 
         for topic_manager in self.topic_managers:
