@@ -18,7 +18,7 @@ engine = None
 
 def init(url):
     global engine
-    engine = create_engine(url)
+    engine = create_engine(url, connect_args={'check_same_thread': False})
 
     try:
         Base.metadata.create_all(engine)
@@ -48,10 +48,27 @@ class Resource(Base):
     __tablename__ = 'resource'
 
     resource_id = Column(String, primary_key=True, default=make_uuid())
-    resource_name = Column(String, nullable=False, unique=True)
+    resource_name = Column(String, nullable=False)
     ckan_server_id = Column(String, ForeignKey('ckan_server.ckan_server_id'))
-    dataset_name = Column(String, nullable=False, unique=True)
+    dataset_name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    @classmethod
+    def create(cls, **kwargs):
+        resource = cls(**kwargs)
+
+        session.add(resource)
+        session.commit()
+
+        return resource
+
+    @classmethod
+    def get_by_name(cls, resource_name):
+        resource = session.query(cls).filter_by(
+            resource_name=resource_name
+        ).first()
+
+        return resource
 
 
 class CkanServer(Base):
