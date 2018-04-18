@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session
 
 Base = declarative_base()
 logger = logging.getLogger(__name__)
@@ -22,7 +23,8 @@ def init(url):
 
     try:
         Base.metadata.create_all(engine)
-        Session = sessionmaker(bind=engine)
+        session_factory = sessionmaker(bind=engine)
+        Session = scoped_session(session_factory)
 
         global session
         session = Session()
@@ -47,7 +49,7 @@ def make_uuid():
 class Resource(Base):
     __tablename__ = 'resource'
 
-    resource_id = Column(String, primary_key=True, default=make_uuid())
+    resource_id = Column(String, primary_key=True, default=make_uuid)
     resource_name = Column(String, nullable=False)
     ckan_server_id = Column(String, ForeignKey('ckan_server.ckan_server_id'))
     dataset_name = Column(String, nullable=False)
@@ -74,8 +76,8 @@ class Resource(Base):
 class CkanServer(Base):
     __tablename__ = 'ckan_server'
 
-    ckan_server_id = Column(String, primary_key=True, default=make_uuid())
-    ckan_server_url = Column(String, nullable=False, unique=True)
+    ckan_server_id = Column(String, primary_key=True, default=make_uuid)
+    ckan_server_url = Column(String, nullable=False)
 
     @classmethod
     def create(cls, ckan_server_url):
