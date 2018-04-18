@@ -50,9 +50,6 @@ class ProcessManager(object):
             )
 
             if server_available:
-                self.server_managers.append(server_manager)
-                server_manager.spawn_dataset_managers(server_config)
-
                 ckan_server_url = server_config.get('url')
                 ckan_server = CkanServer.get_by_url(
                     ckan_server_url=ckan_server_url
@@ -60,6 +57,9 @@ class ProcessManager(object):
 
                 if not ckan_server:
                     CkanServer.create(ckan_server_url=ckan_server_url)
+
+                self.server_managers.append(server_manager)
+                server_manager.spawn_dataset_managers(server_config)
 
         if len(self.server_managers) == 0:
             self.logger.error('No CKAN servers available.')
