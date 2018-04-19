@@ -60,6 +60,8 @@ class ProcessManager(object):
 
                 self.server_managers.append(server_manager)
                 server_manager.spawn_dataset_managers(server_config)
+            else:
+                sys.exit(1)
 
         if len(self.server_managers) == 0:
             self.logger.error('No CKAN servers available.')
