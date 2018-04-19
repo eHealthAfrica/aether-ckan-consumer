@@ -88,6 +88,7 @@ class DatasetManager(Thread):
             'package_id': dataset_name,
             'name': title,
             'description': resource_description,
+            'url_type': 'datastore'
         }
 
         ckan = RemoteCKAN(server_url, apikey=api_key)
