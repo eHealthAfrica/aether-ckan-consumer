@@ -59,15 +59,17 @@ class DatasetManager(Thread):
     def create_resource_in_db(self, resource, dataset_name):
         metadata = resource.get('metadata')
         resource_name = metadata.get('name')
-        resource = Resource.get_by_name(
-            resource_name=resource_name
+        ckan_server_url = self.config.get('ckan_url')
+        ckan_server = CkanServer.get_by_url(
+            ckan_server_url=ckan_server_url
+        )
+        resource = Resource.get(
+            resource_name=resource_name,
+            ckan_server_id=ckan_server.ckan_server_id,
+            dataset_name=dataset_name
         )
 
         if not resource:
-            ckan_server_url = self.config.get('ckan_url')
-            ckan_server = CkanServer.get_by_url(
-                ckan_server_url=ckan_server_url
-            )
             data = {
                 'resource_name': resource_name,
                 'dataset_name': dataset_name,
@@ -94,7 +96,14 @@ class DatasetManager(Thread):
         ckan = RemoteCKAN(server_url, apikey=api_key)
 
         try:
-            db_resource = Resource.get_by_name(resource_name=resource_name)
+            ckan_server = CkanServer.get_by_url(
+                ckan_server_url=server_url
+            )
+            db_resource = Resource.get(
+                resource_name=resource_name,
+                dataset_name=dataset_name,
+                ckan_server_id=ckan_server.ckan_server_id
+            )
 
             if db_resource:
                 return

@@ -64,11 +64,9 @@ class Resource(Base):
         return resource
 
     @classmethod
-    def get_by_name(cls, resource_name):
+    def get(cls, **kwargs):
         session = get_session()
-        resource = session.query(cls).filter_by(
-            resource_name=resource_name
-        ).first()
+        resource = session.query(cls).filter_by(**kwargs).first()
 
         return resource
 
