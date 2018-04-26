@@ -15,6 +15,16 @@ from consumer.config import get_config
 CONN_RETRY = 3
 CONN_RETRY_WAIT_TIME = 2
 
+avroToPostgresPrimitiveTypes = {
+    'string': 'text',
+    'boolean': 'boolean',
+    'int': 'integer',
+    'long': 'bigint',
+    'float': 'float4',
+    'double': 'float8',
+    'bytes': 'bytea',
+}
+
 # Temporary set the log level for Kafka to ERROR during development, so that
 # stdout is not bloated with messages
 logger = logging.getLogger('kafka')
@@ -29,6 +39,7 @@ class TopicManager(Thread):
 
         self.logger = logging.getLogger(__name__)
         self.topic_config = topic_config
+        self.definition_names = []
 
     def run(self):
         self.create_kafka_consumer()
@@ -70,9 +81,6 @@ class TopicManager(Thread):
 
         return False
 
-    def create_kafka_consumer_group(self):
-        pass
-
     def poll_messages(self):
         messages = self.consumer.poll(timeout_ms=1000)
 
@@ -94,6 +102,12 @@ class TopicManager(Thread):
                         print 'Thread name: ', self.getName()
                         print 'Schema:', schema
 
+                        fields = \
+                            self.extract_fields_from_schema(schema)
+                        fields = self.prepare_fields_for_resource(fields)
+
+                        print fields
+
                         for x, msg in enumerate(reader):
                             print 'Data:', msg
 
@@ -106,3 +120,101 @@ class TopicManager(Thread):
         schema = ast.literal_eval(str(raw_schema.get('avro.schema')))
 
         return schema
+
+    def extract_fields_from_schema(self, schema):
+        fields = []
+
+        for definition in schema:
+            is_base_schema = definition.get('aetherBaseSchema')
+
+            if is_base_schema:
+                for field in definition.get('fields'):
+                    fields.append({
+                        'name': field.get('name'),
+                        'type': field.get('type'),
+                    })
+
+            else:
+                self.definition_names.append(definition.get('name'))
+
+        return fields
+
+    def prepare_fields_for_resource(self, fields):
+        resource_fields = []
+
+        for field in fields:
+            resource_field_type = None
+
+            if self.is_field_primitive_type(field):
+                resource_field_type = \
+                    avroToPostgresPrimitiveTypes.get(field.get('type'))
+            elif type(field.get('type')) is dict:
+                field_type = field.get('type').get('type')
+
+                if field_type == 'record' or field_type == 'map':
+                    resource_field_type = 'json'
+                elif field_type == 'array':
+                    field_type = field.get('type').get('items')
+                    resource_field_type = '{0}[]'.format(
+                        avroToPostgresPrimitiveTypes.get(field_type)
+                    )
+                elif field_type == 'enum':
+                    resource_field_type = 'string'
+            elif type(field.get('type')) is list:
+                union_types = field.get('type')
+
+                for union_type in union_types:
+                    if union_type in self.definition_names or \
+                       (type(union_type) is dict and
+                            union_type.get('type') == 'map'):
+                        resource_field_type = 'json'
+                        break
+
+                if resource_field_type:
+                    resource_fields.append({
+                        'type': resource_field_type,
+                        'name': field.get('name'),
+                    })
+                    continue
+
+                for union_type in union_types:
+                    if (type(union_type) is dict and
+                            union_type.get('type') == 'array'):
+                        field_type = union_type.get('items')
+                        resource_field_type = '{0}[]'.format(
+                            avroToPostgresPrimitiveTypes.get(field_type)
+                        )
+                        break
+
+                if resource_field_type:
+                    resource_fields.append({
+                        'type': resource_field_type,
+                        'name': field.get('name'),
+                    })
+                    continue
+
+                if 'bytes' in union_types:
+                    resource_field_type = \
+                        avroToPostgresPrimitiveTypes.get('bytes')
+                elif 'string' in union_types:
+                    resource_field_type = \
+                        avroToPostgresPrimitiveTypes.get('string')
+                else:
+                    resource_field_type = \
+                        avroToPostgresPrimitiveTypes.get(union_types[1])
+
+            if resource_field_type:
+                resource_fields.append({
+                    'type': resource_field_type,
+                    'name': field.get('name'),
+                })
+
+        return resource_fields
+
+    def is_field_primitive_type(self, field):
+        field_type = field.get('type')
+
+        if field_type in avroToPostgresPrimitiveTypes.keys():
+            return True
+
+        return False
