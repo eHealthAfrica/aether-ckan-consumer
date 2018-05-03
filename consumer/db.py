@@ -47,7 +47,7 @@ def make_uuid():
 class Resource(Base):
     __tablename__ = 'resource'
 
-    resource_id = Column(String, primary_key=True, default=make_uuid)
+    resource_id = Column(String, primary_key=True)
     resource_name = Column(String, nullable=False)
     ckan_server_id = Column(String, ForeignKey('ckan_server.ckan_server_id'))
     dataset_name = Column(String, nullable=False)
