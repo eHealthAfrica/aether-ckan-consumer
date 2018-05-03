@@ -17,9 +17,9 @@ CONN_RETRY_WAIT_TIME = 2
 
 avroToPostgresPrimitiveTypes = {
     'string': 'text',
-    'boolean': 'boolean',
-    'int': 'integer',
-    'long': 'bigint',
+    'boolean': 'bool',
+    'int': 'int4',
+    'long': 'int8',
     'float': 'float4',
     'double': 'float8',
     'bytes': 'bytea',
@@ -34,12 +34,13 @@ logger.setLevel(logging.ERROR)
 
 class TopicManager(Thread):
 
-    def __init__(self, topic_config):
+    def __init__(self, resource_manager, topic_config):
         super(TopicManager, self).__init__()
 
         self.logger = logging.getLogger(__name__)
         self.topic_config = topic_config
         self.definition_names = []
+        self.resource_manager = resource_manager
 
     def run(self):
         self.create_kafka_consumer()
@@ -98,19 +99,19 @@ class TopicManager(Thread):
                         reader = DataFileReader(obj, DatumReader())
                         schema = self.extract_schema(reader)
 
-                        print 'Message from topic: {0}'.format(package.topic)
-                        print 'Thread name: ', self.getName()
-                        print 'Schema:', schema
-
                         fields = \
                             self.extract_fields_from_schema(schema)
                         fields = self.prepare_fields_for_resource(fields)
 
-                        print fields
+                        records = []
 
                         for x, msg in enumerate(reader):
-                            print 'Data:', msg
+                            records.append(msg)
 
+                        self.resource_manager.send_data_to_datastore(
+                            fields,
+                            records
+                        )
                         obj.close()
 
             sleep(1)
@@ -155,11 +156,12 @@ class TopicManager(Thread):
                     resource_field_type = 'json'
                 elif field_type == 'array':
                     field_type = field.get('type').get('items')
-                    resource_field_type = '{0}[]'.format(
+                    resource_field_type = '_{0}'.format(
                         avroToPostgresPrimitiveTypes.get(field_type)
                     )
                 elif field_type == 'enum':
-                    resource_field_type = 'string'
+                    resource_field_type = \
+                        avroToPostgresPrimitiveTypes.get('string')
             elif type(field.get('type')) is list:
                 union_types = field.get('type')
 
@@ -173,7 +175,7 @@ class TopicManager(Thread):
                 if resource_field_type:
                     resource_fields.append({
                         'type': resource_field_type,
-                        'name': field.get('name'),
+                        'id': field.get('name'),
                     })
                     continue
 
@@ -181,7 +183,7 @@ class TopicManager(Thread):
                     if (type(union_type) is dict and
                             union_type.get('type') == 'array'):
                         field_type = union_type.get('items')
-                        resource_field_type = '{0}[]'.format(
+                        resource_field_type = '_{0}'.format(
                             avroToPostgresPrimitiveTypes.get(field_type)
                         )
                         break
@@ -189,7 +191,7 @@ class TopicManager(Thread):
                 if resource_field_type:
                     resource_fields.append({
                         'type': resource_field_type,
-                        'name': field.get('name'),
+                        'id': field.get('name'),
                     })
                     continue
 
@@ -206,7 +208,7 @@ class TopicManager(Thread):
             if resource_field_type:
                 resource_fields.append({
                     'type': resource_field_type,
-                    'name': field.get('name'),
+                    'id': field.get('name'),
                 })
 
         return resource_fields
