@@ -1,5 +1,5 @@
 import logging
-from threading import Thread
+from threading import Thread, Lock
 import sys
 import json
 
@@ -9,6 +9,11 @@ from ckanapi import errors as ckanapi_errors
 from consumer.core.topic_manager import TopicManager
 from consumer.db import Resource, CkanServer
 
+# Lock is created when creating a resource in CKAN, because there is a bug if
+# multiple resources are created concurrently. It sets the resource metadata
+# field "state" to "deleted". See https://github.com/ckan/ckan/issues/4217
+resource_create_lock = Lock()
+
 
 class ResourceManager(Thread):
 
@@ -17,15 +22,18 @@ class ResourceManager(Thread):
 
         self.logger = logging.getLogger(__name__)
         self.config = config
+        self.schema = None
 
     def run(self):
         resource = self.config.get('resource')
         dataset_name = self.config.get('dataset').get('metadata').get('name')
 
-        self.create_resource_in_ckan(resource, dataset_name)
-        self.create_resource_in_db(resource, dataset_name)
+        with resource_create_lock:
+            self.create_resource_in_ckan(resource, dataset_name)
+            self.create_resource_in_datastore()
+            self.create_resource_in_db(resource, dataset_name)
 
-        self.spawn_topic_managers()
+            self.spawn_topic_managers()
 
     def spawn_topic_managers(self):
         dataset = self.config.get('dataset')
@@ -44,7 +52,7 @@ class ResourceManager(Thread):
                     'dataset_name': dataset_name,
                     'topic': topic_config,
                 }
-                topic_manager = TopicManager(config)
+                topic_manager = TopicManager(self, config)
                 self.topic_managers.append(topic_manager)
 
         if len(self.topic_managers) == 0:
@@ -75,7 +83,8 @@ class ResourceManager(Thread):
             data = {
                 'resource_name': resource_name,
                 'dataset_name': dataset_name,
-                'ckan_server_id': ckan_server.ckan_server_id
+                'ckan_server_id': ckan_server.ckan_server_id,
+                'resource_id': self.resource_id
             }
 
             Resource.create(**data)
@@ -93,10 +102,9 @@ class ResourceManager(Thread):
             'name': title,
             'description': resource_description,
             'url_type': 'datastore',
-            'url': ' ',
         }
 
-        ckan = RemoteCKAN(server_url, apikey=api_key)
+        self.ckan = RemoteCKAN(server_url, apikey=api_key)
 
         try:
             ckan_server = CkanServer.get_by_url(
@@ -109,13 +117,15 @@ class ResourceManager(Thread):
             )
 
             if db_resource:
+                self.resource_id = db_resource.resource_id
                 return
         except ckanapi_errors.NotFound:
             # Resource does not exist, so continue with execution to create it.
             pass
 
         try:
-            response = ckan.action.resource_create(**payload)
+            response = self.ckan.action.resource_create(**payload)
+            self.resource_id = response.get('id')
             resource_url = '{0}/dataset/{1}/resource/{2}'.format(
                 server_url, dataset_name, response.get('id')
             )
@@ -142,3 +152,83 @@ class ResourceManager(Thread):
                 )
             )
             sys.exit(1)
+
+    def send_data_to_datastore(self, fields, records):
+        if not self.schema:
+            payload = {
+                'id': self.resource_id,
+                'limit': 1,
+            }
+
+            response = self.ckan.action.datastore_search(**payload)
+            new_fields = response.get('fields')
+
+            new_fields[:] = [field for field in new_fields if field.get('id') != '_id']
+
+            self.schema = new_fields
+
+        schema_changes = self.get_schema_changes(self.schema, fields)
+
+        if len(self.schema) == 0 or len(schema_changes) > 0:
+            for new_field in schema_changes:
+                self.schema.append(new_field)
+
+            payload = {
+                'resource_id': self.resource_id,
+                'fields': self.schema,
+            }
+
+            self.ckan.action.datastore_create(**payload)
+
+        records = self.convert_string_to_array(records)
+
+        payload = {
+            'resource_id': self.resource_id,
+            'method': 'insert',
+            'records': records,
+        }
+
+        self.ckan.action.datastore_upsert(**payload)
+
+    def create_resource_in_datastore(self):
+        payload = {
+            'resource_id': self.resource_id,
+        }
+
+        self.ckan.action.datastore_create(**payload)
+
+    def get_schema_changes(self, schema, fields):
+        """ Only check if new field has been added. """
+
+        new_fields = []
+
+        for field in fields:
+            field_found = False
+
+            for schema_field in schema:
+                if field.get('id') == schema_field.get('id'):
+                    field_found = True
+                    break
+
+            if not field_found:
+                new_fields.append(field)
+
+        return new_fields
+
+    def convert_string_to_array(self, records):
+        """ If some of fields is of type array, and value for that field
+        is a string, then it needs to be converted to an array. """
+
+        array_fields = []
+        records = records[:]
+
+        for field in self.schema:
+            if field.get('type').startswith('_'):
+                array_fields.append(field.get('id'))
+
+        for record in records:
+            for key, value in record.items():
+                if key in array_fields and type(value) is unicode:
+                    record[key] = [value]
+
+        return records
