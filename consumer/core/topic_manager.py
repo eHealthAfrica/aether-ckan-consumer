@@ -41,6 +41,7 @@ class TopicManager(Thread):
         self.topic_config = topic_config
         self.definition_names = []
         self.resource_manager = resource_manager
+        self.stopped = False
 
     def run(self):
         self.create_kafka_consumer()
@@ -59,9 +60,11 @@ class TopicManager(Thread):
         server_name = self.topic_config.get('server_name')
         dataset_name = self.topic_config.get('dataset_name')
         topic_name = self.topic_config.get('topic').get('name')
-        group_id = 'CKAN_{0}_{1}_{2}'.format(
-            server_name,
+        resource_name = self.topic_config.get('resource_name')
+        group_id = 'CKAN_{0}_{1}_{2}_{3}'.format(
+            '-'.join(server_name.split(' ')),
             dataset_name,
+            resource_name,
             topic_name
         )
 
@@ -108,11 +111,17 @@ class TopicManager(Thread):
                         for x, msg in enumerate(reader):
                             records.append(msg)
 
+                        print 'send data'
+
                         self.resource_manager.send_data_to_datastore(
                             fields,
                             records
                         )
                         obj.close()
+
+            if self.stopped:
+                self.resource_manager.on_topic_exit(self.name)
+                break
 
             sleep(1)
 
@@ -220,3 +229,6 @@ class TopicManager(Thread):
             return True
 
         return False
+
+    def stop(self):
+        self.stopped = True

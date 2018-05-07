@@ -12,9 +12,10 @@ CONN_RETRY_WAIT_TIME = 2
 
 class ServerManager(object):
 
-    def __init__(self, server_config):
+    def __init__(self, process_manager, server_config):
         self.logger = logging.getLogger(__name__)
         self.server_config = server_config
+        self.process_manager = process_manager
 
     def check_server_availability(self, server_config):
         ''' Checks the server availability using CKAN's API action
@@ -80,7 +81,7 @@ class ServerManager(object):
                 'api_key': server_config.get('api_key'),
                 'dataset': dataset,
             }
-            dataset_manager = DatasetManager(config)
+            dataset_manager = DatasetManager(self, config)
             self.dataset_managers.append(dataset_manager)
 
         if len(self.dataset_managers) == 0:
@@ -93,3 +94,16 @@ class ServerManager(object):
 
         for dataset_manager in self.dataset_managers:
             dataset_manager.start()
+
+    def stop(self):
+        for dataset_manager in self.dataset_managers:
+            dataset_manager.stop()
+
+    def on_dataset_exit(self, dataset_name):
+        for dataset_manager in self.dataset_managers:
+            if dataset_manager.name == dataset_name:
+                self.dataset_managers.remove(dataset_manager)
+                break
+
+        if len(self.dataset_managers) == 0:
+            self.process_manager.on_server_exit(self.server_config.get('url'))

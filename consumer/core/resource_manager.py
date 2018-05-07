@@ -17,12 +17,13 @@ resource_create_lock = Lock()
 
 class ResourceManager(Thread):
 
-    def __init__(self, config):
+    def __init__(self, dataset_manager, config):
         super(ResourceManager, self).__init__()
 
         self.logger = logging.getLogger(__name__)
         self.config = config
         self.schema = None
+        self.dataset_manager = dataset_manager
 
     def run(self):
         resource = self.config.get('resource')
@@ -51,6 +52,7 @@ class ResourceManager(Thread):
                     'server_name': self.config.get('server_name'),
                     'dataset_name': dataset_name,
                     'topic': topic_config,
+                    'resource_name': resource.get('metadata').get('name')
                 }
                 topic_manager = TopicManager(self, config)
                 self.topic_managers.append(topic_manager)
@@ -160,7 +162,16 @@ class ResourceManager(Thread):
                 'limit': 1,
             }
 
-            response = self.ckan.action.datastore_search(**payload)
+            try:
+                response = self.ckan.action.datastore_search(**payload)
+            except ckanapi_errors.CKANAPIError:
+                self.logger.error(
+                    'An error occured while getting Datastore fields for '
+                    'resource {0}'
+                    .format(self.get_resource_url())
+                )
+                return
+
             new_fields = response.get('fields')
 
             new_fields[:] = [field for field in new_fields if field.get('id') != '_id']
@@ -178,7 +189,14 @@ class ResourceManager(Thread):
                 'fields': self.schema,
             }
 
-            self.ckan.action.datastore_create(**payload)
+            try:
+                self.ckan.action.datastore_create(**payload)
+            except ckanapi_errors.CKANAPIError:
+                self.logger.error(
+                    'An error occured while adding new fields for resource {0}'
+                    ' in Datastore'
+                    .format(self.get_resource_url())
+                )
 
         records = self.convert_string_to_array(records)
 
@@ -188,14 +206,26 @@ class ResourceManager(Thread):
             'records': records,
         }
 
-        self.ckan.action.datastore_upsert(**payload)
+        try:
+            self.ckan.action.datastore_upsert(**payload)
+        except ckanapi_errors.CKANAPIError:
+            self.logger.error(
+                'An error occured while inserting data into resource {0}'
+                .format(self.get_resource_url())
+            )
 
     def create_resource_in_datastore(self):
         payload = {
             'resource_id': self.resource_id,
         }
 
-        self.ckan.action.datastore_create(**payload)
+        try:
+            self.ckan.action.datastore_create(**payload)
+        except ckanapi_errors.CKANAPIError:
+            self.logger.error(
+                'An error occured while creating resource {0} in Datastore'
+                .format(self.get_resource_url())
+            )
 
     def get_schema_changes(self, schema, fields):
         """ Only check if new field has been added. """
@@ -232,3 +262,25 @@ class ResourceManager(Thread):
                     record[key] = [value]
 
         return records
+
+    def stop(self):
+        for topic_manager in self.topic_managers:
+            topic_manager.stop()
+
+    def on_topic_exit(self, topic_name):
+        for topic_manager in self.topic_managers:
+            if topic_manager.name == topic_name:
+                self.topic_managers.remove(topic_manager)
+                break
+
+        if len(self.topic_managers) == 0:
+            self.dataset_manager.on_resource_exit(self.name)
+
+    def get_resource_url(self):
+        server_url = self.config.get('ckan_url')
+        dataset_name = self.config.get('dataset').get('metadata').get('name')
+        resource_url = '{0}/dataset/{1}/resource/{2}'.format(
+            server_url, dataset_name, self.resource_id
+        )
+
+        return resource_url

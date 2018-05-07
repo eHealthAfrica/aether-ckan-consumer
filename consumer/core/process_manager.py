@@ -1,6 +1,7 @@
 import signal
 import sys
 import logging
+from time import sleep
 
 from consumer.core.server_manager import ServerManager
 from consumer.config import get_config
@@ -12,17 +13,27 @@ class ProcessManager(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.stopped = False
 
     def run(self):
         self.listen_stop_signal()
         config = get_config()
         self.spawn_server_managers(config)
 
+        while True:
+            if self.stopped:
+                self.logger.info('App gracefully stopped.')
+                break
+
+            sleep(1)
+
     def on_stop_handler(self, signum, frame):
         ''' Called when the application needs to be gracefully stopped. '''
 
         self.logger.info('Gracefully stopping...')
-        sys.exit(0)
+
+        for server_manager in self.server_managers:
+            server_manager.stop()
 
     def listen_stop_signal(self):
         ''' Listens for the SIGTERM signal so that the application can be
@@ -43,7 +54,7 @@ class ProcessManager(object):
         self.server_managers = []
 
         for server_config in servers:
-            server_manager = ServerManager(server_config)
+            server_manager = ServerManager(self, server_config)
 
             server_available = server_manager.check_server_availability(
                 server_config
@@ -69,3 +80,12 @@ class ProcessManager(object):
         else:
             self.logger.info('Spawned {0} Server manager(s).'
                              .format(len(self.server_managers)))
+
+    def on_server_exit(self, server_url):
+        for server_manager in self.server_managers:
+            if server_manager.server_config.get('url') == server_url:
+                self.server_managers.remove(server_manager)
+                break
+
+        if len(self.server_managers) == 0:
+            self.stopped = True

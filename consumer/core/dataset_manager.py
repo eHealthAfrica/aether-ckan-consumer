@@ -13,11 +13,12 @@ from consumer.config import parse_json_from_file
 
 class DatasetManager(Thread):
 
-    def __init__(self, config):
+    def __init__(self, server_manager, config):
         super(DatasetManager, self).__init__()
 
         self.logger = logging.getLogger(__name__)
         self.config = config
+        self.server_manager = server_manager
 
     def run(self):
         self.create_dataset_in_ckan()
@@ -37,7 +38,7 @@ class DatasetManager(Thread):
                 'ckan_url': self.config.get('ckan_url'),
                 'api_key': self.config.get('api_key'),
             }
-            resource_manager = ResourceManager(config)
+            resource_manager = ResourceManager(self, config)
             self.resource_managers.append(resource_manager)
 
         if len(self.resource_managers) == 0:
@@ -106,3 +107,16 @@ class DatasetManager(Thread):
         updated_metadata.update(overwritten_data)
 
         return updated_metadata
+
+    def stop(self):
+        for resource_manager in self.resource_managers:
+            resource_manager.stop()
+
+    def on_resource_exit(self, resource_name):
+        for resource_manager in self.resource_managers:
+            if resource_manager.name == resource_name:
+                self.resource_managers.remove(resource_manager)
+                break
+
+        if len(self.resource_managers) == 0:
+            self.server_manager.on_dataset_exit(self.name)
