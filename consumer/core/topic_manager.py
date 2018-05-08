@@ -92,6 +92,11 @@ class TopicManager(Thread):
 
     def read_messages(self):
         while True:
+            if self.stopped:
+                self.consumer.close()
+                self.resource_manager.on_topic_exit(self.name)
+                break
+
             partitioned_messages = self.poll_messages()
 
             if partitioned_messages:
@@ -111,17 +116,11 @@ class TopicManager(Thread):
                         for x, msg in enumerate(reader):
                             records.append(msg)
 
-                        print 'send data'
-
                         self.resource_manager.send_data_to_datastore(
                             fields,
                             records
                         )
                         obj.close()
-
-            if self.stopped:
-                self.resource_manager.on_topic_exit(self.name)
-                break
 
             sleep(1)
 
