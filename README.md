@@ -18,9 +18,9 @@ docker-compose up --timeout 60
 
 The `--timeout` argument tells Docker how many seconds to wait before it kills
 the app when it is gracefully stopped. The default is 10 seconds. This should
-be specified based on how many CKAN portals are feed with data, and how much.
-Because when the app is gracefully stopped, it will send all data processed
-from Kafka.
+be specified based on how many CKAN portals are configured, and how many
+datasets need to be feed with data. Because when the app is gracefully stopped,
+ it will send all data processed from Kafka.
 
 ### Configuration
 
@@ -97,9 +97,10 @@ exists. Also, keep in mind that datasets you don't have access to (private),
 will be shown as "Not found" on the CKAN portal. So make sure the name is
 trully unique for your purpose.
 - `ckan_servers.datasets.metadata.owner_org`: Name of the organization. For
-instance, for this organization https://example.com/organization/org-name, the
-name of the organization is *org-name*. This name is unique p CKAN er
-instance. Note that this organization must be previously created in CKAN.
+instance, for this organization `https://example.com/organization/org-name`,
+the name of the organization is *org-name*. This name is unique per CKAN
+instance. Note that this organization must be previously created in CKAN from
+the UI.
 - `ckan_servers.datasets.metadata.notes`: Description of the dataset.
 - `ckan_servers.datasets.resources`: List of resources that should be feed with
 data.
