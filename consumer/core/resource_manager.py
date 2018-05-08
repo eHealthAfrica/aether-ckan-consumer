@@ -174,7 +174,8 @@ class ResourceManager(Thread):
 
             new_fields = response.get('fields')
 
-            new_fields[:] = [field for field in new_fields if field.get('id') != '_id']
+            new_fields[:] = [field for field in new_fields
+                             if field.get('id') != '_id']
 
             self.schema = new_fields
 
