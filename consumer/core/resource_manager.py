@@ -45,7 +45,7 @@ class ResourceManager(Thread):
         topics = resource.get('topics')
 
         for topic_config in topics:
-            number_of_consumers = topic_config.get('number_of_consumers')
+            number_of_consumers = topic_config.get('number_of_consumers', 1)
 
             for i in range(number_of_consumers):
                 config = {
