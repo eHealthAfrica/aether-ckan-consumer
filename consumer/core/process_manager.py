@@ -2,6 +2,7 @@ import signal
 import sys
 import logging
 from time import sleep
+import os
 
 from consumer.core.server_manager import ServerManager
 from consumer.config import get_config
@@ -19,13 +20,15 @@ class ProcessManager(object):
         self.listen_stop_signal()
         config = get_config()
         self.spawn_server_managers(config)
+        environment = os.getenv('ENVIRONMENT')
 
-        while True:
-            if self.stopped:
-                self.logger.info('App gracefully stopped.')
-                break
+        if environment != 'test':
+            while True:
+                if self.stopped:
+                    self.logger.info('App gracefully stopped.')
+                    break
 
-            sleep(1)
+                sleep(1)
 
     def on_stop_handler(self, signum, frame):
         ''' Called when the application needs to be gracefully stopped. '''
