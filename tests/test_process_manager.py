@@ -1,7 +1,7 @@
 import unittest
 
 from mock import Mock
-import responses
+import pook
 
 from consumer.core.process_manager import ProcessManager
 from consumer.core.server_manager import ServerManager
@@ -27,21 +27,15 @@ class TestProcessManager(unittest.TestCase):
         assert self.process_manager.listen_stop_signal.called
         assert self.process_manager.spawn_server_managers.called
 
-    @responses.activate
+    @pook.activate
     def test_spawn_server_managers(self):
-        responses.add(
-            responses.GET,
-            'http://ckan-server1.com/api/action/status_show',
-            json={'success': True},
-            status=200
-        )
+        pook.get('http://ckan-server1.com/api/action/status_show') \
+            .reply(200) \
+            .json({'success': True})
 
-        responses.add(
-            responses.GET,
-            'http://ckan-server2.com/api/action/status_show',
-            json={'success': True},
-            status=200
-        )
+        pook.get('http://ckan-server2.com/api/action/status_show') \
+            .reply(200) \
+            .json({'success': True})
 
         config = {
             'ckan_servers': [
@@ -57,21 +51,15 @@ class TestProcessManager(unittest.TestCase):
         assert type(self.process_manager.server_managers[0]) is ServerManager
         assert type(self.process_manager.server_managers[1]) is ServerManager
 
-    @responses.activate
+    @pook.activate
     def test_spawn_server_managers_with_404(self):
-        responses.add(
-            responses.GET,
-            'http://ckan-server1.com/api/action/status_show',
-            json={'success': True},
-            status=200
-        )
+        pook.get('http://ckan-server1.com/api/action/status_show') \
+            .reply(200) \
+            .json({'success': True})
 
-        responses.add(
-            responses.GET,
-            'http://ckan-server2.com/api/action/status_show',
-            json={'success': True},
-            status=404
-        )
+        pook.get('http://ckan-server2.com/api/action/status_show') \
+            .reply(404) \
+            .json({'success': True})
 
         config = {
             'ckan_servers': [
@@ -80,7 +68,5 @@ class TestProcessManager(unittest.TestCase):
             ]
         }
 
-        self.process_manager.spawn_server_managers(config)
-
-        assert len(self.process_manager.server_managers) == 1
-        assert type(self.process_manager.server_managers[0]) is ServerManager
+        with self.assertRaises(SystemExit):
+            self.process_manager.spawn_server_managers(config)

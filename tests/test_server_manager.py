@@ -1,6 +1,6 @@
 import unittest
 
-import responses
+import pook
 
 from consumer.core.server_manager import ServerManager
 from consumer.core.dataset_manager import DatasetManager
@@ -16,16 +16,13 @@ class TestServerManager(unittest.TestCase):
             'datasets': []
         }
 
-        self.server_manager = ServerManager(config)
+        self.server_manager = ServerManager(None, config)
 
-    @responses.activate
+    @pook.activate
     def test_check_server_availability(self):
-        responses.add(
-            responses.GET,
-            'http://ckan-server1.com/api/action/status_show',
-            json={'success': True},
-            status=200
-        )
+        pook.get('http://ckan-server1.com/api/action/status_show') \
+            .reply(200) \
+            .json({'success': True})
 
         server_config = {
             'url': 'http://ckan-server1.com',
@@ -38,14 +35,11 @@ class TestServerManager(unittest.TestCase):
 
         assert server_available is True
 
-    @responses.activate
+    @pook.activate
     def test_check_server_availability_with_404(self):
-        responses.add(
-            responses.GET,
-            'http://ckan-server1.com/api/action/status_show',
-            json={'success': True},
-            status=404
-        )
+        pook.get('http://ckan-server1.com/api/action/status_show') \
+            .reply(404) \
+            .json({'success': True})
 
         server_config = {
             'url': 'http://ckan-server1.com',
@@ -58,14 +52,11 @@ class TestServerManager(unittest.TestCase):
 
         assert server_available is False
 
-    @responses.activate
+    @pook.activate
     def test_check_server_availability_with_no_success(self):
-        responses.add(
-            responses.GET,
-            'http://ckan-server1.com/api/action/status_show',
-            json={'success': False},
-            status=404
-        )
+        pook.get('http://ckan-server1.com/api/action/status_show') \
+            .reply(404) \
+            .json({'success': False})
 
         server_config = {
             'url': 'http://ckan-server1.com',
@@ -78,14 +69,11 @@ class TestServerManager(unittest.TestCase):
 
         assert server_available is False
 
-    @responses.activate
+    @pook.activate
     def test_check_server_availability_with_no_json(self):
-        responses.add(
-            responses.GET,
-            'http://ckan-server1.com/api/action/status_show',
-            body='i am a body',
-            status=404
-        )
+        pook.get('http://ckan-server1.com/api/action/status_show') \
+            .reply(404) \
+            .body('i am a body')
 
         server_config = {
             'url': 'http://ckan-server1.com',
@@ -98,7 +86,7 @@ class TestServerManager(unittest.TestCase):
 
         assert server_available is False
 
-    @responses.activate
+    @pook.activate
     def test_spawn_dataset_managers(self):
         data = {
             'error': {
@@ -107,19 +95,9 @@ class TestServerManager(unittest.TestCase):
             }
         }
 
-        responses.add(
-            responses.POST,
-            'http://ckan-server1.com/api/action/package_show',
-            json=data,
-            status=200
-        )
-
-        responses.add(
-            responses.POST,
-            'http://ckan-server1.com/api/action/package_create',
-            json={'success': True, 'result': {}},
-            status=200
-        )
+        pook.post('http://ckan-server1.com/api/action/package_show') \
+            .reply(200) \
+            .json({'success': True, 'result': {}})
 
         config = {
             'url': 'http://ckan-server1.com',
