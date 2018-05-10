@@ -209,6 +209,9 @@ class ResourceManager(Thread):
 
         try:
             self.ckan.action.datastore_upsert(**payload)
+            self.logger.info('Updated resource {0} in {1}.'.format(
+                self.resource_id, self.ckan.address
+            ))
         except ckanapi_errors.CKANAPIError:
             self.logger.error(
                 'An error occured while inserting data into resource {0}'
