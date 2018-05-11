@@ -1,4 +1,6 @@
 import unittest
+import os
+import signal
 
 from mock import Mock
 import pook
@@ -15,7 +17,6 @@ class TestProcessManager(unittest.TestCase):
 
         self.process_manager = ProcessManager()
 
-    def setUp(self):
         url = 'sqlite:////srv/app/db/test.db'
         db.init(url)
 
@@ -24,8 +25,8 @@ class TestProcessManager(unittest.TestCase):
         self.process_manager.spawn_server_managers = Mock()
         self.process_manager.run()
 
-        assert self.process_manager.listen_stop_signal.called
-        assert self.process_manager.spawn_server_managers.called
+        assert self.process_manager.listen_stop_signal.called is True
+        assert self.process_manager.spawn_server_managers.called is True
 
     @pook.activate
     def test_spawn_server_managers(self):
@@ -70,3 +71,12 @@ class TestProcessManager(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             self.process_manager.spawn_server_managers(config)
+
+    def test_on_stop_handler(self):
+        self.process_manager.spawn_server_managers = Mock()
+        self.process_manager.on_stop_handler = Mock()
+        self.process_manager.run()
+
+        os.kill(os.getpid(), signal.SIGTERM)
+
+        assert self.process_manager.on_stop_handler.called is True
