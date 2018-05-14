@@ -46,7 +46,7 @@ class TopicManager(Thread):
     def run(self):
         self.create_kafka_consumer()
 
-        if self.consumer:
+        if hasattr(self, 'consumer'):
             topic_name = self.topic_config.get('topic').get('name')
             self.consumer.subscribe([topic_name])
             self.logger.info(
