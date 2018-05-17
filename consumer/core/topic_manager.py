@@ -4,6 +4,7 @@ from time import sleep
 import io
 import ast
 import sys
+import json
 
 from kafka import KafkaConsumer
 from kafka import errors as KafkaErrors
@@ -126,7 +127,7 @@ class TopicManager(Thread):
 
     def extract_schema(self, reader):
         raw_schema = ast.literal_eval(str(reader.meta))
-        schema = ast.literal_eval(str(raw_schema.get('avro.schema')))
+        schema = json.loads(str(raw_schema.get('avro.schema')))
 
         return schema
 

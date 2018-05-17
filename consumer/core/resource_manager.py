@@ -199,7 +199,7 @@ class ResourceManager(Thread):
                     .format(self.get_resource_url())
                 )
 
-        records = self.convert_string_to_array(records)
+        records = self.convert_item_to_array(records)
 
         payload = {
             'resource_id': self.resource_id,
@@ -249,9 +249,19 @@ class ResourceManager(Thread):
 
         return new_fields
 
-    def convert_string_to_array(self, records):
-        """ If some of fields is of type array, and value for that field
-        is a string, then it needs to be converted to an array. """
+    def convert_item_to_array(self, records):
+        """ If a field is of type array, and the value for it contains a
+        primitive type, then convert it to an array of that primtive type.
+
+        This mutation is required for all records, otherwise CKAN will raise
+        an exception.
+
+        Example:
+            For given field which is of type array of integers
+            {'type': '_int', 'id': 'scores'}
+            Original record {'scores': 10}
+            Changed record {'scores': [10]}
+        """
 
         array_fields = []
         records = records[:]
@@ -262,7 +272,7 @@ class ResourceManager(Thread):
 
         for record in records:
             for key, value in record.items():
-                if key in array_fields and type(value) is unicode:
+                if key in array_fields:
                     record[key] = [value]
 
         return records
