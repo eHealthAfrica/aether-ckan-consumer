@@ -1,5 +1,4 @@
 #!/bin/sh -e
 
-nosetests ./tests
-
+docker-compose -f ./docker-compose.test.yml run test
 pycodestyle .

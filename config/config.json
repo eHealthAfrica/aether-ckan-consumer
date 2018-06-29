@@ -3,7 +3,10 @@
         "url": "sqlite:////srv/app/db/consumer.db"
     },
     "kafka": {
-        "url": "localhost:9092"
+        "url": "localhost:9092",
+        "aether_emit_flag_required": true,
+        "aether_emit_flag_field_path": "$.approved",
+        "aether_emit_flag_values": [true]
     },
     "ckan_servers": [
         {

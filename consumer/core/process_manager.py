@@ -23,12 +23,15 @@ class ProcessManager(object):
         environment = os.getenv('ENVIRONMENT')
 
         if environment != 'test':
+            self.logger.debug('Live environment detected')
             while True:
                 if self.stopped:
                     self.logger.info('App gracefully stopped.')
                     break
 
                 sleep(1)
+        else:
+            self.logger.debug('stopping for test completion')
 
     def on_stop_handler(self, signum, frame):
         ''' Called when the application needs to be gracefully stopped. '''
