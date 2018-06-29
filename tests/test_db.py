@@ -13,7 +13,7 @@ def gen_uuid():
 class TestDB(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDB, self).__init__(*args, **kwargs)
-        self.db_url = 'sqlite:////srv/app/db/test.db'
+        self.db_url = ':memory:'
 
     @classmethod
     def tearDownClass(cls):
