@@ -1,10 +1,10 @@
+import ast
 import logging
 from threading import Thread
 from time import sleep
 import io
-import ast
-import sys
 import json
+import sys
 
 from kafka import KafkaConsumer
 from kafka import errors as KafkaErrors
@@ -47,7 +47,7 @@ class TopicManager(Thread):
     def run(self):
         self.create_kafka_consumer()
 
-        if hasattr(self, 'consumer'):
+        if self.consumer:
             topic_name = self.topic_config.get('topic').get('name')
             self.consumer.subscribe([topic_name])
             self.logger.info(
@@ -74,7 +74,7 @@ class TopicManager(Thread):
                 self.consumer = KafkaConsumer(
                     group_id=group_id,
                     bootstrap_servers=[kafka_url],
-                    auto_offset_reset='latest',
+                    auto_offset_reset='earliest',
                 )
 
                 return True
@@ -127,25 +127,30 @@ class TopicManager(Thread):
 
     def extract_schema(self, reader):
         raw_schema = ast.literal_eval(str(reader.meta))
-        schema = json.loads(str(raw_schema.get('avro.schema')))
-
+        schema = json.loads(raw_schema.get("avro.schema"))
         return schema
 
     def extract_fields_from_schema(self, schema):
         fields = []
+        if isinstance(schema, list):
+            for definition in schema:
+                is_base_schema = definition.get('aetherBaseSchema')
 
-        for definition in schema:
-            is_base_schema = definition.get('aetherBaseSchema')
+                if is_base_schema:
+                    for field in definition.get('fields'):
+                        fields.append({
+                            'name': field.get('name'),
+                            'type': field.get('type'),
+                        })
 
-            if is_base_schema:
-                for field in definition.get('fields'):
-                    fields.append({
-                        'name': field.get('name'),
-                        'type': field.get('type'),
-                    })
-
-            else:
-                self.definition_names.append(definition.get('name'))
+                else:
+                    self.definition_names.append(definition.get('name'))
+        else:
+            for field in schema.get('fields'):
+                fields.append({
+                    'name': field.get('name'),
+                    'type': field.get('type'),
+                })
 
         return fields
 
