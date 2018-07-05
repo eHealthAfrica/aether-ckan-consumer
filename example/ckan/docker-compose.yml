@@ -29,6 +29,8 @@ services:
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+    volumes:
+     - ./ckan:/etc/ckan
     networks:
       - aether
       - ckan_net
