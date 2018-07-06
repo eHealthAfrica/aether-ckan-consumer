@@ -18,4 +18,4 @@ services:
       - aether
       - ckan-net
     volumes:
-      - ./ckan-consumer/db/:/srv/app/db/
+      - ./db/:/srv/app/db/
