@@ -1,0 +1,21 @@
+version: "3"
+
+networks:
+  aether:
+    external:
+      name: aether_internal
+  ckan-net:
+    external:
+      name: ckan_ckan_net
+
+services:
+  app:
+    build:
+      context: ../..
+    env_file:
+      - ../../.env
+    networks:
+      - aether
+      - ckan-net
+    volumes:
+      - ./ckan-consumer/db/:/srv/app/db/
