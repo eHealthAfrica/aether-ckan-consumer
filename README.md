@@ -1,6 +1,6 @@
 ## Aether CKAN Kafka Consumer
 
-[![Build Status](https://travis-ci.com/ViderumGlobal/aether-ckan-consumer.svg?token=fEtgVpYzTRuyVvasgs5K&branch=master)](https://travis-ci.com/ViderumGlobal/aether-ckan-consumer)
+[![Build Status](https://travis-ci.com/eHealthAfrica/aether-ckan-consumer.svg?token=gHAe1qxjJyFVW9WoFY5S&branch=master)](https://travis-ci.com/eHealthAfrica/aether-ckan-consumer)
 
 This is an Aether CKAN Kafka Consumer, which consumes datа from Kafka and feeds
 CKAN portals with data in the Datastore.
