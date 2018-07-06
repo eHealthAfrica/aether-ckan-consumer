@@ -13,4 +13,4 @@ ARG DS_RO_PASS
 
 # Include datastore setup scripts
 ADD ./postgresql/docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
-COPY production.ini /etc/ckan/production.ini
+COPY ./ckan/production.ini /etc/ckan/production.ini
