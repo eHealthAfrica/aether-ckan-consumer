@@ -11,7 +11,7 @@
 	"ckan_servers": [{
 		"title": "CKAN Demo portal",
 		"url": "http://localhost:5000",
-		"api_key": "c8abf93d-64ae-4e3e-959d-4466b315816a",
+		"api_key": "b7e0a95f-69a8-4d3c-ac0d-5b2f77164207",
 		"datasets": [{
 			"metadata": {
 				"title": "Microcensus",
@@ -50,7 +50,8 @@
 					"topics": [{
 						"name": "Household",
 						"number_of_consumers": 1
-					},{
+					}]
+				}, {
 					"metadata": {
 						"title": "Building",
 						"description": "a Building",
