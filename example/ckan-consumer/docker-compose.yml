@@ -16,8 +16,9 @@ services:
       - CONSUMER_CONF_DIR=./example/ckan-consumer
     env_file:
       - ../../.env
-    networks:
-      - aether
-      - ckan-net
+    network_mode: host
+#    networks:
+#      - aether
+#      - ckan-net
     volumes:
-      - ./db/:/srv/app/db/
+      - ./config:/srv/app/example/ckan-consumer/config

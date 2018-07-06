@@ -63,5 +63,6 @@ if [ -z "$CKAN_DATAPUSHER_URL" ]; then
 fi
 
 set_environment
+ckan-paster --plugin=ckan datastore set-permissions -c "${CKAN_CONFIG}/production.ini" | sudo -u postgres psql --set ON_ERROR_STOP=1
 ckan-paster --plugin=ckan db init -c "${CKAN_CONFIG}/production.ini"
 exec "$@"

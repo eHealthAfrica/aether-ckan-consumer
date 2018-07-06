@@ -1,71 +1,60 @@
 {
-    "database": {
-        "url": "sqlite:////srv/app/db/consumer.db"
-    },
-    "kafka": {
-        "url": "kafka:29092",
-        "aether_emit_flag_required": false,
-        "aether_emit_flag_field_path": "$.approved",
-        "aether_emit_flag_values": [true]
-    },
-    "ckan_servers": [
-        {
-            "title": "CKAN Demo portal",
-            "url": "http://ckan:5000",
-            "api_key": "0f4a269c-1dc8-4d7f-9667-bd8a87761af9",
-            "datasets": [
-                {
-                    "metadata": {
-                        "title": "Microcensus",
-                        "name": "microcensus-001",
-                        "owner_org": "eha",
-                        "notes": "Small Household Microcensus",
-                        "author": "Field overriden from default_metadata.json"
-                    },
-                    "resources": [
-                        {
-                            "metadata": {
-                                "title": "Session",
-                                "description": "a Session",
-                                "name": "session-data"
-                            },
-                            "topics": [
-                                {
-                                    "name": "session",
-                                    "number_of_consumers": 1
-                                }
-                            ]
-                        },
-                        {
-                            "metadata": {
-                                "title": "Child",
-                                "description": "Children",
-                                "name": "child-data"
-                            },
-                            "topics": [
-                                {
-                                    "name": "child",
-                                    "number_of_consumers": 1
-                                }
-                            ]
-                        }                        {
-                            "metadata": {
-                                "title": "Household",
-                                "description": "a Household",
-                                "name": "household-data"
-                            },
-                            "topics": [
-                                {
-                                    "name": "household",
-                                    "number_of_consumers": 1
-                                }
-                            ]
-                        }
+	"database": {
+		"url": "sqlite:////srv/app/db/consumer.db"
+	},
+	"kafka": {
+		"url": "localhost:29092",
+		"aether_emit_flag_required": false,
+		"aether_emit_flag_field_path": "$.approved",
+		"aether_emit_flag_values": [true]
+	},
+	"ckan_servers": [{
+		"title": "CKAN Demo portal",
+		"url": "http://localhost:5000",
+		"api_key": "c8abf93d-64ae-4e3e-959d-4466b315816a",
+		"datasets": [{
+			"metadata": {
+				"title": "Microcensus",
+				"name": "microcensus-001",
+				"owner_org": "ehademo",
+				"notes": "Small Household Microcensus",
+				"author": "Field overriden from default_metadata.json"
+			},
+			"resources": [{
+					"metadata": {
+						"title": "Session",
+						"description": "a Session",
+						"name": "session-data1"
+					},
+					"topics": [{
+						"name": "session",
+						"number_of_consumers": 1
+					}]
+				},
+				{
+					"metadata": {
+						"title": "Child",
+						"description": "Children",
+						"name": "child-data1"
+					},
+					"topics": [{
+						"name": "child",
+						"number_of_consumers": 1
+					}]
+				}, {
+					"metadata": {
+						"title": "Household",
+						"description": "a Household",
+						"name": "household-data1"
+					},
+					"topics": [{
+						"name": "household",
+						"number_of_consumers": 1
+					}]
+				}
 
 
-                    ]
-                }
-            ]
-        }
-    ]
+			]
+		}]
+	}]
 }
