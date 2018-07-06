@@ -27,18 +27,18 @@
 						"name": "session-data1"
 					},
 					"topics": [{
-						"name": "session",
+						"name": "Session",
 						"number_of_consumers": 1
 					}]
 				},
 				{
 					"metadata": {
-						"title": "Child",
-						"description": "Children",
-						"name": "child-data1"
+						"title": "Person",
+						"description": "Person",
+						"name": "person-data1"
 					},
 					"topics": [{
-						"name": "child",
+						"name": "Person",
 						"number_of_consumers": 1
 					}]
 				}, {
@@ -48,7 +48,16 @@
 						"name": "household-data1"
 					},
 					"topics": [{
-						"name": "household",
+						"name": "Household",
+						"number_of_consumers": 1
+					},{
+					"metadata": {
+						"title": "Building",
+						"description": "a Building",
+						"name": "building-data1"
+					},
+					"topics": [{
+						"name": "Building",
 						"number_of_consumers": 1
 					}]
 				}
