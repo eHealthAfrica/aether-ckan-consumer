@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     logger.info('Starting application...')
 
-    dir_path = os.getcwd()
+    if not os.environ.get('CONSUMER_CONF_DIR'):
+        dir_path = os.getcwd()
+    else:
+        dir_path = os.environ.get('CONSUMER_CONF_DIR')
 
     # Located in the config directory
     config_file = os.path.join('config', 'config.json')

@@ -6,5 +6,7 @@ services:
       - .env
     # Temporary set to enable access to local Kafka from outside the container.
     network_mode: "host"
+    environment:
+      - CONSUMER_CONF_DIR=./config 
     volumes:
       - ./db/:/srv/app/db/
