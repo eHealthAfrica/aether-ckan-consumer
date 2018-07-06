@@ -6,10 +6,10 @@ import io
 import json
 import sys
 
-from kafka import KafkaConsumer
+from aet.consumer import KafkaConsumer
 from kafka import errors as KafkaErrors
-from avro.datafile import DataFileReader
-from avro.io import DatumReader
+# from avro.datafile import DataFileReader
+# from avro.io import DatumReader
 
 from consumer.config import get_config
 

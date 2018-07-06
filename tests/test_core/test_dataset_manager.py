@@ -14,7 +14,7 @@ class TestDatasetManager(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDatasetManager, self).__init__(*args, **kwargs)
 
-        url = 'sqlite:////srv/app/db/test.db'
+        url = 'sqlite://'
         db.init(url)
 
         config = {

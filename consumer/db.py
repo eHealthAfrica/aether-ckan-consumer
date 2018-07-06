@@ -21,14 +21,15 @@ def init(url):
     engine = create_engine(url, connect_args={'check_same_thread': False})
 
     try:
+        logger.info('Connecting to DB @ %s' % url)
         Base.metadata.create_all(engine)
 
         global Session
         Session = sessionmaker(bind=engine)
 
         logger.info('Database initialized.')
-    except SQLAlchemyError:
-        logger.error('Database could not be initialized.')
+    except SQLAlchemyError as sar:
+        logger.error('Database could not be initialized: %s' % sar)
         sys.exit(1)
 
 
