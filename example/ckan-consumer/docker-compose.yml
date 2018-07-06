@@ -12,6 +12,8 @@ services:
   app:
     build:
       context: ../..
+    environment:
+      - CONSUMER_CONF_DIR=./example/ckan-consumer
     env_file:
       - ../../.env
     networks:
