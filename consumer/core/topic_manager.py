@@ -8,8 +8,8 @@ import sys
 
 from aet.consumer import KafkaConsumer
 from kafka import errors as KafkaErrors
-# from avro.datafile import DataFileReader
-# from avro.io import DatumReader
+from spavro.datafile import DataFileReader
+from spavro.io import DatumReader
 
 from consumer.config import get_config
 
