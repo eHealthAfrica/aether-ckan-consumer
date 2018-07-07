@@ -22,3 +22,5 @@ services:
 #      - ckan-net
     volumes:
       - ./config:/srv/app/example/ckan-consumer/config
+      - ./db:/srv/app/db
+

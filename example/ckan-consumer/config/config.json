@@ -11,7 +11,7 @@
 	"ckan_servers": [{
 		"title": "CKAN Demo portal",
 		"url": "http://localhost:5000",
-		"api_key": "b7e0a95f-69a8-4d3c-ac0d-5b2f77164207",
+		"api_key": "c1d129b5-ffe5-424a-acce-4af317344bdc",
 		"datasets": [{
 			"metadata": {
 				"title": "Microcensus",
@@ -22,12 +22,12 @@
 			},
 			"resources": [{
 					"metadata": {
-						"title": "Session",
-						"description": "a Session",
-						"name": "session-data1"
+						"title": "Survey",
+						"description": "a Survey",
+						"name": "survey-data1"
 					},
 					"topics": [{
-						"name": "Session",
+						"name": "Survey",
 						"number_of_consumers": 1
 					}]
 				},
