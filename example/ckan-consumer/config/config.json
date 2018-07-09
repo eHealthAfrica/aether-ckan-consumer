@@ -6,12 +6,14 @@
 		"url": "kafka:29092",
 		"aether_emit_flag_required": false,
 		"aether_emit_flag_field_path": "$.approved",
-		"aether_emit_flag_values": [true]
+		"aether_emit_flag_values": [true],
+                "aether_masking_schema_levels" : ["false", "true"],
+                "aether_masking_schema_emit_level": "false"
 	},
 	"ckan_servers": [{
 		"title": "CKAN Demo portal",
 		"url": "http://ckan:5000",
-		"api_key": "c1d129b5-ffe5-424a-acce-4af317344bdc",
+		"api_key": "a1ba4b38-11e1-44f5-916d-d7392402345a",
 		"datasets": [{
 			"metadata": {
 				"title": "Microcensus",

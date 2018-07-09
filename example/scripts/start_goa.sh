@@ -20,6 +20,5 @@
 #
 set -Eeuo pipefail
 
-pushd ckan
-docker-compose up
-popd
+scripts/run_aether.sh &
+scripts/run_gather.sh &

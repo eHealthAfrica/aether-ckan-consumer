@@ -20,6 +20,9 @@
 #
 set -Eeuo pipefail
 
-pushd ckan
-docker-compose up
+pushd aether-bootstrap
+docker-compose -f docker-compose.yml -f docker-compose-connect.yml down
+popd
+pushd gather
+docker-compose -f docker-compose.yml down
 popd
