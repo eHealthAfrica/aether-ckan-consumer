@@ -14,7 +14,7 @@
 	"ckan_servers": [{
 		"title": "CKAN Demo portal",
 		"url": "http://ckan:5000",
-		"api_key": "861eefea-997f-4db9-9141-0a97736ae02e",
+		"api_key": "0ea21f25-74aa-4505-af7d-f9e0bdfba491",
 		"datasets": [{
 			"metadata": {
 				"title": "Microcensus",
