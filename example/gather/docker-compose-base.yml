@@ -2,7 +2,7 @@ version: "2.1"
 
 services:
 
-# ---------------------------------
+  # ---------------------------------
   # Gather container
   # ---------------------------------
 
@@ -10,12 +10,16 @@ services:
     image: ehealthafrica/gather:3.0.0-rc
     stdin_open: true
     tty: true
-    environment: &gather-environment
+    environment:
       CAS_SERVER_URL: https://ums-dev.ehealthafrica.org
       CSRF_COOKIE_DOMAIN: gather.local
-      DEBUG: "true"
       HOSTNAME: gather.local
-      STATIC_ROOT: /code/gather/assets/bundles
+      DEBUG: "true"
+
+      DJANGO_SECRET_KEY: "T7cyDESETLHDz43xf3Spx9NN6UdbDkpeREfy6fwATcckcwXUUvnqfHcwyNLHrXAZ"
+      STATIC_ROOT: /code/gather/static
+
+      ADMIN_PASSWORD: adminadmin
 
       AETHER_KERNEL_TOKEN: a2d6bc20ad16ec8e715f2f42f54eb00cbbea2d24
       AETHER_KERNEL_URL: http://kernel:8000
@@ -38,33 +42,6 @@ services:
       CSV_MAX_ROWS_SIZE: 1000
 
       WEB_SERVER_PORT: 8005
-    #volumes: &gather-volumes
-      #################################################
-      #                    WARNING                    #
-      # do not include the root folder as volume or   #
-      # `node_modules` folder will not be available   #
-      #                                               #
-      # - ./:/code # DO NOT UNCOMMENT!!!              #
-      #################################################
-
-      #- ./conf:/code/conf
-      #- ./app/gather:/code/gather
-
-      #- ./app/entrypoint.sh:/code/entrypoint.sh
-      #- ./app/manage.py:/code/manage.py
-      #- ./app/package.json:/code/package.json
     ports:
       - "8005:8005"
     command: start_dev
-
-  # ---------------------------------
-  # Gather Webpack container
-  # ---------------------------------
-
-  gather-webpack-base:
-    image: ehealthafrica/gather:3.0.0-rc
-    environment: *gather-environment
-    #volumes: *gather-volumes
-    ports:
-      - "3005:3005"
-    command: start_webpack
