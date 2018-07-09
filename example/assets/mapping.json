@@ -98,5 +98,9 @@
   [
     "household_group[*].occupant[*].occupant_gender",
     "Person.occupant_gender"
+  ],
+  [
+    "household_group[*].occupant[*].occupant_name",
+    "Person.occupant_name"
   ]
 ]
