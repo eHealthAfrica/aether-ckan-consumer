@@ -57,7 +57,7 @@ class TopicManager(Thread):
             self.read_messages()
 
     def create_kafka_consumer(self):
-        kafka_url = get_config().get('kafka').get('url')
+        consumer_settings = get_config().get('kafka')
         server_name = self.topic_config.get('server_name')
         dataset_name = self.topic_config.get('dataset_name')
         topic_name = self.topic_config.get('topic').get('name')
@@ -71,12 +71,8 @@ class TopicManager(Thread):
 
         for i in range(CONN_RETRY):
             try:
-                self.consumer = KafkaConsumer(
-                    group_id=group_id,
-                    bootstrap_servers=[kafka_url],
-                    auto_offset_reset='earliest',
-                )
-
+                consumer_settings['group_id'] = group_id
+                self.consumer = KafkaConsumer(**consumer_settings)
                 return True
             except KafkaErrors.NoBrokersAvailable:
                 self.logger.error('Kafka not available. Retrying...')
@@ -92,37 +88,29 @@ class TopicManager(Thread):
         return messages
 
     def read_messages(self):
+        schema = None
+        last_schema = None
         while True:
             if self.stopped:
                 self.consumer.close()
                 self.resource_manager.on_topic_exit(self.name)
                 break
-
-            partitioned_messages = self.poll_messages()
-
-            if partitioned_messages:
-                for part, packages in partitioned_messages.items():
-                    for package in packages:
-                        obj = io.BytesIO()
-                        obj.write(package.value)
-                        reader = DataFileReader(obj, DatumReader())
-                        schema = self.extract_schema(reader)
-
-                        fields = \
-                            self.extract_fields_from_schema(schema)
+            new_records = self.consumer.poll_and_deserialize(timeout_ms=1000)
+            for parition_key, packages in new_records.items():
+                for package in packages:
+                    schema = package.get('schema')
+                    messages = package.get('messages')
+                    if schema != last_schema:
+                        fields = self.extract_fields_from_schema(schema)
                         fields = self.prepare_fields_for_resource(fields)
-
-                        records = []
-
-                        for x, msg in enumerate(reader):
-                            records.append(msg)
-
-                        self.resource_manager.send_data_to_datastore(
+                    records = []
+                    for msg in messages:
+                        records.append(msg)
+                    self.resource_manager.send_data_to_datastore(
                             fields,
                             records
                         )
-                        obj.close()
-
+                    last_schema = schema
             sleep(1)
 
     def extract_schema(self, reader):
