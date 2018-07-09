@@ -13,7 +13,10 @@
 		"kafka": {
 			"type": "object",
 			"properties": {
-				"url": {
+				"bootstrap_servers": {
+					"type": "string"
+				},
+                "auto_offset_reset": {
 					"type": "string"
 				},
 				"aether_emit_flag_required": {
@@ -85,7 +88,7 @@
 				}
 
 			},
-			"required": ["url", "aether_emit_flag_required"]
+			"required": ["bootstrap_servers", "aether_emit_flag_required"]
 		},
 		"ckan_servers": {
 			"type": "array",

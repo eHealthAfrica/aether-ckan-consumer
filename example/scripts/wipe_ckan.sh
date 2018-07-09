@@ -25,4 +25,6 @@ docker-compose -f docker-compose.yml down
 popd
 pushd ckan-consumer
 docker-compose -f docker-compose.yml down
+pushd db
+sudo rm ./consumer.db
 popd
