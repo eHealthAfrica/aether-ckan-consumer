@@ -13,10 +13,7 @@
 		"kafka": {
 			"type": "object",
 			"properties": {
-				"bootstrap_servers": {
-					"type": "string"
-				},
-                "auto_offset_reset": {
+				"url": {
 					"type": "string"
 				},
 				"aether_emit_flag_required": {
@@ -88,7 +85,7 @@
 				}
 
 			},
-			"required": ["bootstrap_servers", "aether_emit_flag_required"]
+			"required": ["url", "aether_emit_flag_required"]
 		},
 		"ckan_servers": {
 			"type": "array",
@@ -103,7 +100,13 @@
 					},
 					"api_key": {
 						"type": "string"
-					},
+					}
+                    "autoconfig_datasets": {
+                    	"type": "boolean"
+                    },
+                    "autoconfig_owner_org": {
+                    	"type": "string"
+                    },
 					"datasets": {
 						"type": "array",
 						"items": {
@@ -171,7 +174,7 @@
 						}
 					}
 				},
-				"required": ["title", "url", "api_key", "datasets"]
+				"required": ["title", "url", "api_key", "autoconfig_datasets"]
 			}
 		}
 	},

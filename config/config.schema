@@ -100,7 +100,13 @@
 					},
 					"api_key": {
 						"type": "string"
-					},
+					}
+                    "autoconfig_datasets": {
+                    	"type": "boolean"
+                    },
+                    "autoconfig_owner_org": {
+                    	"type": "string"
+                    },
 					"datasets": {
 						"type": "array",
 						"items": {
@@ -168,7 +174,7 @@
 						}
 					}
 				},
-				"required": ["title", "url", "api_key", "datasets"]
+				"required": ["title", "url", "api_key", "autoconfig_datasets"]
 			}
 		}
 	},

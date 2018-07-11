@@ -1,0 +1,45 @@
+{
+    "database": {
+        "url": "sqlite:////srv/app/db/consumer.db"
+    },
+    "kafka": {
+        "url": "localhost:9092",
+        "aether_emit_flag_required": true,
+        "aether_emit_flag_field_path": "$.approved",
+        "aether_emit_flag_values": [true]
+    },
+    "ckan_servers": [
+        {
+            "title": "CKAN Demo portal",
+            "url": "http://localhost:5000",
+            "api_key": "e7b4d292-f282-44d2-b40e-34d753fd22b3",
+            "autoconfig_datasets" : false,
+            "datasets": [
+                {
+                    "metadata": {
+                        "title": "Pollution in Germany",
+                        "name": "pollution-in-germany111",
+                        "owner_org": "dsvre",
+                        "notes": "Some description",
+                        "author": "Field overriden from default_metadata.json"
+                    },
+                    "resources": [
+                        {
+                            "metadata": {
+                                "title": "Sensor data",
+                                "description": "Sensor data from wind turbines",
+                                "name": "sensor-data"
+                            },
+                            "topics": [
+                                {
+                                    "name": "test-1",
+                                    "number_of_consumers": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -4,7 +4,11 @@ import logging
 import requests
 from requests.exceptions import ConnectionError
 
+from aet.consumer import KafkaConsumer
+from kafka.consumer.fetcher import NoOffsetForPartitionError
+
 from consumer.core.dataset_manager import DatasetManager
+from consumer.config import get_config
 
 CONN_RETRY = 3
 CONN_RETRY_WAIT_TIME = 2
@@ -63,6 +67,94 @@ class ServerManager(object):
 
         return False
 
+    def get_datasets_from_kafka(self, server_config):
+        ''' Gets dataset configurations from looking at metadata available
+        in all Kafka Topics.
+
+        :param server_config: The configuration for the server.
+        :type server_config: dictionary
+
+        '''
+        self.logger.info('Attempting to autoconfig_datasets')
+        kafka_url = get_config().get('kafka').get('url')
+        consumer = KafkaConsumer(bootstrap_servers=[kafka_url])
+        topics = consumer.topics()
+        consumer.close()
+        datasets = []
+        for topic in topics:
+            self.logger.info('Creating dataset for topic {0}.'.format(topic))
+            consumer = KafkaConsumer(
+                bootstrap_servers=[kafka_url],
+                auto_offset_reset='earliest')
+            dataset = self.get_dataset_from_topic(consumer, topic)
+            consumer.close()
+            if dataset:
+                self.logger.info('Dataset {0} created.'.format(topic))
+                datasets.append(dataset)
+            else:
+                self.logger.info('Dataset {0} failed to be created.'.format(topic))
+        return datasets
+
+
+    def get_dataset_from_topic(self, consumer, topic):
+        ''' Gets dataset configurations from looking at metadata available
+        in all Kafka Topics.
+
+        :param consumer: A KafkaConsumer attached to a Kafka Instance
+        :type consumer: KafkaConsumer
+        :param topic: The name of the topic
+        :type topic: string
+
+        '''
+
+        try:
+            consumer.subscribe(topic)
+            consumer.seek_to_beginning()
+            poll_result = consumer.poll_and_deserialize(
+                timeout_ms=timeout_ms,
+                max_records=max_records)
+            for parition_key, packages in poll_result.items():
+                for package in packages:
+                    if not package.get('schema'):
+                        raise AttributeError('Topic %s has no schema.' % topic)
+        except NoOffsetForPartitionError as nofpe:
+            self.logger.error("Error on dataset creation for topic {0}; {1}".format(
+                topic,
+                nofpe))
+            return None
+        except AttributeError as aer:
+            self.logger.error("Error on dataset creation for topic {0}; {1}".format(
+                topic,
+                nofpe))
+            return None
+
+        tmp = {
+                    "metadata": {
+                        "title": topic,
+                        "name": topic,
+                        "owner_org": server_config.get('autoconfig_owner_org'),
+                        "notes": None,
+                        "author": None
+                    },
+                    "resources": [
+                        {
+                            "metadata": {
+                                "title": topic,
+                                "description": None,
+                                "name": topic
+                            },
+                            "topics": [
+                                {
+                                    "name": topic,
+                                    "number_of_consumers": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+        return tmp
+
+
     def spawn_dataset_managers(self, server_config):
         ''' Spawns Server Managers based on the config.
 
@@ -70,8 +162,13 @@ class ServerManager(object):
         :type server_config: dictionary
 
         '''
+        auto_config = server_config.get('autoconfig_datasets')
 
-        datasets = server_config.get('datasets')
+        if auto_config:
+            datasets = self.get_datasets_from_kafka(server_config)
+        else:
+            datasets = server_config.get('datasets')
+
         self.dataset_managers = []
 
         for dataset in datasets:
