@@ -18,13 +18,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-set -Eeuo pipefail
+set -Euo pipefail
 
 pushd ckan
+docker-compose -f docker-compose.yml kill
 docker-compose -f docker-compose.yml down
 popd
 pushd ckan-consumer
+docker-compose -f docker-compose.yml kill
 docker-compose -f docker-compose.yml down
 pushd db
-sudo rm ./consumer.db
+sudo rm consumer.db
 popd
