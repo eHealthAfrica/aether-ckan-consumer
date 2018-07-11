@@ -58,6 +58,7 @@ class TopicManager(Thread):
 
     def create_kafka_consumer(self):
         consumer_settings = get_config().get('kafka')
+        kafka_url = consumer_settings.get('url')
         server_name = self.topic_config.get('server_name')
         dataset_name = self.topic_config.get('dataset_name')
         topic_name = self.topic_config.get('topic').get('name')

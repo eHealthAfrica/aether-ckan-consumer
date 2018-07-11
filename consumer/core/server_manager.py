@@ -1,6 +1,6 @@
 from time import sleep
 import logging
-
+import re
 import requests
 from requests.exceptions import ConnectionError
 
@@ -76,7 +76,8 @@ class ServerManager(object):
 
         '''
         self.logger.info('Attempting to autoconfig_datasets')
-        kafka_url = get_config().get('kafka').get('url')
+        kafka_settings = get_config().get('kafka')
+        kafka_url = kafka_settings.get('bootstrap_servers')
         consumer = KafkaConsumer(bootstrap_servers=[kafka_url])
         topics = consumer.topics()
         consumer.close()
@@ -84,9 +85,9 @@ class ServerManager(object):
         for topic in topics:
             self.logger.info('Creating dataset for topic {0}.'.format(topic))
             consumer = KafkaConsumer(
-                bootstrap_servers=[kafka_url],
-                auto_offset_reset='earliest')
-            dataset = self.get_dataset_from_topic(consumer, topic)
+                auto_offset_reset='earliest',
+                **kafka_settings)
+            dataset = self.get_dataset_from_topic(consumer, topic, server_config)
             consumer.close()
             if dataset:
                 self.logger.info('Dataset {0} created.'.format(topic))
@@ -96,7 +97,7 @@ class ServerManager(object):
         return datasets
 
 
-    def get_dataset_from_topic(self, consumer, topic):
+    def get_dataset_from_topic(self, consumer, topic, server_config):
         ''' Gets dataset configurations from looking at metadata available
         in all Kafka Topics.
 
@@ -104,6 +105,8 @@ class ServerManager(object):
         :type consumer: KafkaConsumer
         :param topic: The name of the topic
         :type topic: string
+        :param server_config: The configuration for the server.
+        :type server_config: dictionary
 
         '''
 
@@ -111,8 +114,8 @@ class ServerManager(object):
             consumer.subscribe(topic)
             consumer.seek_to_beginning()
             poll_result = consumer.poll_and_deserialize(
-                timeout_ms=timeout_ms,
-                max_records=max_records)
+                timeout_ms=1000,
+                max_records=1)
             for parition_key, packages in poll_result.items():
                 for package in packages:
                     if not package.get('schema'):
@@ -125,13 +128,13 @@ class ServerManager(object):
         except AttributeError as aer:
             self.logger.error("Error on dataset creation for topic {0}; {1}".format(
                 topic,
-                nofpe))
+                aer))
             return None
-
+        safe_name = re.sub(r'\W+', '', topic).lower()
         tmp = {
                     "metadata": {
                         "title": topic,
-                        "name": topic,
+                        "name": safe_name,
                         "owner_org": server_config.get('autoconfig_owner_org'),
                         "notes": None,
                         "author": None
@@ -141,7 +144,7 @@ class ServerManager(object):
                             "metadata": {
                                 "title": topic,
                                 "description": None,
-                                "name": topic
+                                "name": safe_name+"-resource"
                             },
                             "topics": [
                                 {

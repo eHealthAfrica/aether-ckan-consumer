@@ -13,7 +13,7 @@
 		"kafka": {
 			"type": "object",
 			"properties": {
-				"url": {
+				"bootstrap_servers": {
 					"type": "string"
 				},
 				"aether_emit_flag_required": {
@@ -85,7 +85,7 @@
 				}
 
 			},
-			"required": ["url", "aether_emit_flag_required"]
+			"required": ["bootstrap_servers", "aether_emit_flag_required"]
 		},
 		"ckan_servers": {
 			"type": "array",
@@ -100,7 +100,7 @@
 					},
 					"api_key": {
 						"type": "string"
-					}
+					},
                     "autoconfig_datasets": {
                     	"type": "boolean"
                     },
