@@ -27,7 +27,7 @@ services:
 
       AETHER_MODULES: "kernel,odk,"
 
-      AETHER_ODK_TOKEN: d5184a044bb5acff89a76ec4e67d0fcddd5cd3a1
+      AETHER_ODK_TOKEN: a2d6bc20ad16ec8e715f2f42f54eb00cbbea2d24
       AETHER_ODK_URL: http://odk:8443
       AETHER_ODK_URL_TEST: http://odk-test:9443
 
