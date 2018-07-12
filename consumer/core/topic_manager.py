@@ -108,10 +108,11 @@ class TopicManager(Thread):
                     records = []
                     for msg in messages:
                         records.append(msg)
-                    self.resource_manager.send_data_to_datastore(
-                            fields,
-                            records
-                        )
+                    if records:  # Emit rules may parse out messages.
+                        self.resource_manager.send_data_to_datastore(
+                                fields,
+                                records
+                            )
                     last_schema = schema
             sleep(1)
 
