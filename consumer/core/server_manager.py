@@ -133,14 +133,6 @@ class ServerManager(object):
                     if not schema:
                         raise AttributeError('Topic %s has no schema.' % topic)
                     self.logger.info("Schema: %s" % schema)
-                    try:
-                        msg = package.get('messages')[0]
-                        self.logger.info("Sample message: %s" % msg)
-                    except Exception as err:
-                        self.logger.error(err)
-                        self.logger.info(poll_result)
-                        raise AttributeError('Topic %s has message available.' % topic)
-
 
         except NoOffsetForPartitionError as nofpe:
             self.logger.error("Error on dataset creation for topic {0}; {1}".format(
