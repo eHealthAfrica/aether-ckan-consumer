@@ -3,6 +3,7 @@ import logging
 import re
 import requests
 from requests.exceptions import ConnectionError
+from threading import Thread
 
 from aet.consumer import KafkaConsumer
 from kafka.consumer.fetcher import NoOffsetForPartitionError
@@ -20,6 +21,9 @@ class ServerManager(object):
         self.logger = logging.getLogger(__name__)
         self.server_config = server_config
         self.process_manager = process_manager
+        self.dataset_managers = []
+        self.ignored_topics = []
+        self.autoconfig_watcher = None
 
     def check_server_availability(self, server_config):
         ''' Checks the server availability using CKAN's API action
@@ -75,14 +79,20 @@ class ServerManager(object):
         :type server_config: dictionary
 
         '''
-        self.logger.info('Attempting to autoconfig_datasets')
+        self.logger.info('Looking for new topics to auto configure')
         kafka_settings = get_config().get('kafka')
         kafka_url = kafka_settings.get('bootstrap_servers')
         consumer = KafkaConsumer(bootstrap_servers=[kafka_url])
         topics = consumer.topics()
         consumer.close()
         datasets = []
+        existing_datasets = [i.title for i in self.dataset_managers if hasattr(i, 'title')]
         for topic in topics:
+            if topic in self.ignored_topics:
+                continue
+            if topic in existing_datasets:
+                self.logger.debug('Dataset for topic {0} already exists.'.format(topic))
+                continue
             self.logger.info('Creating dataset for topic {0}.'.format(topic))
             consumer = KafkaConsumer(
                 auto_offset_reset='earliest',
@@ -94,6 +104,7 @@ class ServerManager(object):
                 datasets.append(dataset)
             else:
                 self.logger.info('Dataset {0} failed to be created.'.format(topic))
+                self.ignored_topics.append(topic)
         return datasets
 
 
@@ -168,11 +179,18 @@ class ServerManager(object):
         auto_config = server_config.get('autoconfig_datasets')
 
         if auto_config:
-            datasets = self.get_datasets_from_kafka(server_config)
+            if not self.autoconfig_watcher:
+                self.autoconfig_watcher = AutoconfigWatcher(self, server_config)
+                self.autoconfig_watcher.start()
+                #Delegating to the threaded / repeatable process
+                return
+            else:
+                datasets = self.get_datasets_from_kafka(server_config)
+
         else:
             datasets = server_config.get('datasets')
 
-        self.dataset_managers = []
+        new_dataset_managers = []
 
         for dataset in datasets:
             config = {
@@ -182,20 +200,23 @@ class ServerManager(object):
                 'dataset': dataset,
             }
             dataset_manager = DatasetManager(self, config)
+            new_dataset_managers.append(dataset_manager)
             self.dataset_managers.append(dataset_manager)
 
-        if len(self.dataset_managers) == 0:
-            self.logger.info('No Dataset Managers spawned.')
+        if len(new_dataset_managers) == 0:
+            self.logger.info('No new Dataset Managers spawned.')
         else:
             self.logger.info(
                 'Spawned {0} Dataset manager(s) for server {1}.'
-                .format(len(self.dataset_managers), server_config.get('title'))
+                .format(len(new_dataset_managers), server_config.get('title'))
             )
 
-        for dataset_manager in self.dataset_managers:
+        for dataset_manager in new_dataset_managers:
             dataset_manager.start()
 
     def stop(self):
+        if self.autoconfig_watcher:
+            self.autoconfig_watcher.stop()
         for dataset_manager in self.dataset_managers:
             dataset_manager.stop()
 
@@ -207,3 +228,21 @@ class ServerManager(object):
 
         if len(self.dataset_managers) == 0:
             self.process_manager.on_server_exit(self.server_config.get('url'))
+
+class AutoconfigWatcher(Thread):
+    def __init__(self, server_manager, server_config):
+        super(AutoconfigWatcher, self).__init__()
+        self.stopped = False
+        self.server_manager = server_manager
+        self.server_config = server_config
+
+    def run(self):
+        while not self.stopped:
+            self.server_manager.spawn_dataset_managers(self.server_config)
+            for tick in range(30):
+                sleep(1)
+                if self.stopped:
+                    return
+
+    def stop(self):
+        self.stopped =True

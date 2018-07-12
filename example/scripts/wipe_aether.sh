@@ -21,7 +21,9 @@
 set -Eeuo pipefail
 
 pushd aether-bootstrap
-docker-compose -f docker-compose.yml -f docker-compose-connect.yml down
+docker-compose -f docker-compose.yml down
+docker-compose -f docker-compose-connect.yml down
+sudo rm -r ./.persistent_data
 popd
 pushd gather
 docker-compose -f docker-compose.yml down

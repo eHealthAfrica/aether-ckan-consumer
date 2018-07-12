@@ -18,6 +18,10 @@ class DatasetManager(Thread):
 
         self.logger = logging.getLogger(__name__)
         self.config = config
+        self.title = config.get(
+            "dataset", {}).get(
+            "metadata", {}).get(
+            'title')
         self.server_manager = server_manager
 
     def run(self):
