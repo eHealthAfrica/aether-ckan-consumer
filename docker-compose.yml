@@ -1,12 +1,13 @@
 version: "3"
 services:
-  app:
+  ckan-consumer:
     build: .
+    image: aether-ckan-consumer
     env_file:
       - .env
     # Temporary set to enable access to local Kafka from outside the container.
     network_mode: "host"
     environment:
-      - CONSUMER_CONF_DIR=./config 
+      - CONSUMER_CONF_DIR=./config
     volumes:
       - ./db/:/srv/app/db/
