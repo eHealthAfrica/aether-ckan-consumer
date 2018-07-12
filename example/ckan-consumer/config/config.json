@@ -14,7 +14,7 @@
         {
             "title": "CKAN Demo portal",
             "url": "http://ckan:5000",
-            "api_key": "ab7ab6b8-d5db-4462-b5b9-c85db0b15bf2",
+            "api_key": "8d8653f7-ddff-49e2-af8b-c1a2b157de85",
             "autoconfig_datasets" : true,
             "autoconfig_owner_org": "ehademo"
         }

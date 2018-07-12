@@ -10,12 +10,11 @@ networks:
 
 services:
   app:
-    build:
-      context: ../..
+    image: ehealthafrica/aether-ckan-consumer:0.8.0-rc
     environment:
       - CONSUMER_CONF_DIR=./example/ckan-consumer
     env_file:
-      - ../../.env
+      - .env
     networks:
       - aether
       - ckan-net
