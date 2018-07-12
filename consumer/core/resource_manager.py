@@ -192,11 +192,16 @@ class ResourceManager(Thread):
 
             try:
                 self.ckan.action.datastore_create(**payload)
-            except ckanapi_errors.CKANAPIError:
+            except ckanapi_errors.CKANAPIError as cke:
                 self.logger.error(
                     'An error occured while adding new fields for resource {0}'
                     ' in Datastore'
                     .format(self.get_resource_url())
+                )
+                self.logger.error(
+                    'ResourceType: {0}'
+                    ' Error: {1}'
+                    .format(self.name, cke)
                 )
 
         records = self.convert_item_to_array(records)
@@ -212,10 +217,15 @@ class ResourceManager(Thread):
             self.logger.info('Updated resource {0} in {1}.'.format(
                 self.resource_id, self.ckan.address
             ))
-        except ckanapi_errors.CKANAPIError:
+        except ckanapi_errors.CKANAPIError as cke:
             self.logger.error(
                 'An error occured while inserting data into resource {0}'
                 .format(self.get_resource_url())
+            )
+            self.logger.error(
+                'ResourceType: {0}'
+                ' Error: {1}'
+                .format(self.name, cke)
             )
 
     def create_resource_in_datastore(self):
