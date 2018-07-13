@@ -6,3 +6,11 @@ services:
 cache: pip
 install: bash bin/travis-build.bash
 script: sh bin/travis-run.sh
+
+deploy:
+- provider: script
+  script: "./scripts/release.sh"
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^release\-[0-9]+\.[0-9]+[\.0-9]*$

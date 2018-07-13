@@ -50,6 +50,11 @@ release_app () {
 
 }
 
+if [ -z "$TRAVIS_TAG" ];
+then
+  VERSION=${VERSION}-rc
+fi
+
 for APP in "${CORE_APPS[@]}"
 do
   release_app $APP $CORE_COMPOSE
