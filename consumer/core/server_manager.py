@@ -86,27 +86,30 @@ class ServerManager(object):
         topics = consumer.topics()
         consumer.close()
         datasets = []
-        existing_datasets = [i.title for i in self.dataset_managers if hasattr(i, 'title')]
+        existing_datasets = [
+            i.title for i in self.dataset_managers if hasattr(i, 'title')]
         for topic in topics:
             if topic in self.ignored_topics:
                 continue
             if topic in existing_datasets:
-                self.logger.debug('Dataset for topic {0} already exists.'.format(topic))
+                self.logger.debug(
+                    'Dataset for topic {0} already exists.'.format(topic))
                 continue
             self.logger.info('Creating dataset for topic {0}.'.format(topic))
             consumer = KafkaConsumer(
                 auto_offset_reset='earliest',
                 **kafka_settings)
-            dataset = self.get_dataset_from_topic(consumer, topic, server_config)
+            dataset = self.get_dataset_from_topic(
+                consumer, topic, server_config)
             consumer.close()
             if dataset:
                 self.logger.info('Dataset {0} created.'.format(topic))
                 datasets.append(dataset)
             else:
-                self.logger.info('Dataset {0} failed to be created.'.format(topic))
+                self.logger.info(
+                    'Dataset {0} failed to be created.'.format(topic))
                 self.ignored_topics.append(topic)
         return datasets
-
 
     def get_dataset_from_topic(self, consumer, topic, server_config):
         ''' Gets dataset configurations from looking at metadata available
@@ -135,42 +138,43 @@ class ServerManager(object):
                     self.logger.info("Schema: %s" % schema)
 
         except NoOffsetForPartitionError as nofpe:
-            self.logger.error("Error on dataset creation for topic {0}; {1}".format(
-                topic,
-                nofpe))
+            self.logger.error(
+                "Error on dataset creation for topic {0}; {1}".format(
+                    topic,
+                    nofpe))
             return None
         except AttributeError as aer:
-            self.logger.error("Error on dataset creation for topic {0}; {1}".format(
-                topic,
-                aer))
+            self.logger.error(
+                "Error on dataset creation for topic {0}; {1}".format(
+                    topic,
+                    aer))
             return None
         safe_name = re.sub(r'\W+', '', topic).lower()
         tmp = {
+            "metadata": {
+                "title": topic,
+                "name": safe_name,
+                "owner_org": server_config.get('autoconfig_owner_org'),
+                "notes": None,
+                "author": None
+            },
+            "resources": [
+                {
                     "metadata": {
                         "title": topic,
-                        "name": safe_name,
-                        "owner_org": server_config.get('autoconfig_owner_org'),
-                        "notes": None,
-                        "author": None
+                        "description": None,
+                        "name": safe_name+"-resource"
                     },
-                    "resources": [
+                    "topics": [
                         {
-                            "metadata": {
-                                "title": topic,
-                                "description": None,
-                                "name": safe_name+"-resource"
-                            },
-                            "topics": [
-                                {
-                                    "name": topic,
-                                    "number_of_consumers": 1
-                                }
-                            ]
+                            "name": topic,
+                            "number_of_consumers": 1
                         }
                     ]
                 }
+            ]
+        }
         return tmp
-
 
     def spawn_dataset_managers(self, server_config):
         ''' Spawns Server Managers based on the config.
@@ -183,9 +187,10 @@ class ServerManager(object):
 
         if auto_config:
             if not self.autoconfig_watcher:
-                self.autoconfig_watcher = AutoconfigWatcher(self, server_config)
+                self.autoconfig_watcher = AutoconfigWatcher(
+                    self, server_config)
                 self.autoconfig_watcher.start()
-                #Delegating to the threaded / repeatable process
+                # Delegating to the threaded / repeatable process
                 return
             else:
                 datasets = self.get_datasets_from_kafka(server_config)
@@ -232,6 +237,7 @@ class ServerManager(object):
         if len(self.dataset_managers) == 0:
             self.process_manager.on_server_exit(self.server_config.get('url'))
 
+
 class AutoconfigWatcher(Thread):
     def __init__(self, server_manager, server_config):
         super(AutoconfigWatcher, self).__init__()
@@ -248,4 +254,4 @@ class AutoconfigWatcher(Thread):
                     return
 
     def stop(self):
-        self.stopped =True
+        self.stopped = True
