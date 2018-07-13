@@ -4,15 +4,17 @@
     },
     "kafka": {
         "bootstrap_servers": "kafka:29092",
-        "aether_emit_flag_required": true,
+        "aether_emit_flag_required": false,
         "aether_emit_flag_field_path": "$.approved",
-        "aether_emit_flag_values": [true]
+        "aether_emit_flag_values": [true],
+        "aether_masking_schema_levels" : ["false", "true"],
+        "aether_masking_schema_emit_level": "true"
     },
     "ckan_servers": [
         {
             "title": "CKAN Demo portal",
-            "url": "http://localhost:5000",
-            "api_key": "e7b4d292-f282-44d2-b40e-34d753fd22b3",
+            "url": "http://ckan:5000",
+            "api_key": "178b6b4a-5e6a-4764-9e09-907da25350ee",
             "autoconfig_datasets" : true,
             "autoconfig_owner_org": "ehademo"
         }

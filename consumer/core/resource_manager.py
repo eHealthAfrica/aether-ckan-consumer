@@ -1,3 +1,4 @@
+from ast import literal_eval
 import logging
 from threading import Thread, Lock
 import sys
@@ -23,6 +24,8 @@ class ResourceManager(Thread):
         self.logger = logging.getLogger(__name__)
         self.config = config
         self.schema = None
+        self.rename_fields = {}
+        self.bad_terms = []
         self.dataset_manager = dataset_manager
 
     def run(self):
@@ -182,6 +185,7 @@ class ResourceManager(Thread):
         schema_changes = self.get_schema_changes(self.schema, fields)
 
         if len(self.schema) == 0 or len(schema_changes) > 0:
+            self.logger.info('Detected Schema Changes')
             for new_field in schema_changes:
                 self.schema.append(new_field)
 
@@ -198,11 +202,23 @@ class ResourceManager(Thread):
                     ' in Datastore'
                     .format(self.get_resource_url())
                 )
+                label = str(cke)
                 self.logger.error(
                     'ResourceType: {0}'
                     ' Error: {1}'
-                    .format(self.name, cke)
+                    .format(self.name, label)
                 )
+                bad_fields = literal_eval(label).get('fields', None)
+                if not isinstance(bad_fields, list):
+                    raise ValueError('Bad field could not be identified.')
+                issue = bad_fields[0]
+                bad_term = str(issue.split(" ")[0]).strip("'").strip('"')
+                self.bad_terms.append(bad_term)
+                self.logger.info('Trying to recover from error caused by bad field name %s' % bad_term)
+                self.logger.info('Reverting %s' % (schema_changes,))
+                for new_field in schema_changes:
+                    self.schema.remove(new_field)
+                return self.send_data_to_datastore(fields, records)
 
         records = self.convert_item_to_array(records)
 
@@ -255,9 +271,19 @@ class ResourceManager(Thread):
                     break
 
             if not field_found:
-                new_fields.append(field)
+                if field.get('id') in self.bad_terms:
+                    new_fields.append(self.rename_field(field))
+                else:
+                    new_fields.append(field)
 
         return new_fields
+
+    def rename_field(self, field):
+        bad_name = field.get('id')
+        new_name = "ae" + bad_name
+        self.rename_fields[bad_name] = new_name
+        field['id'] = new_name
+        return field
 
     def convert_item_to_array(self, records):
         """ If a field is of type array, and the value for it contains a
@@ -282,8 +308,16 @@ class ResourceManager(Thread):
 
         for record in records:
             for key, value in record.items():
+                if self.bad_terms:
+                    name = self.rename_fields.get(key, key)
+                    if name != key:
+                        del record[key]
+                else:
+                    name = key
                 if key in array_fields:
-                    record[key] = [value]
+                    record[name] = [value]
+                else:
+                    record[name] = value
 
         return records
 
