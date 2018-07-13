@@ -214,7 +214,8 @@ class ResourceManager(Thread):
                 issue = bad_fields[0]
                 bad_term = str(issue.split(" ")[0]).strip("'").strip('"')
                 self.bad_terms.append(bad_term)
-                self.logger.info('Trying to recover from error caused by bad field name %s' % bad_term)
+                self.logger.info(
+                    'Recovery from error: bad field name %s' % bad_term)
                 self.logger.info('Reverting %s' % (schema_changes,))
                 for new_field in schema_changes:
                     self.schema.remove(new_field)
