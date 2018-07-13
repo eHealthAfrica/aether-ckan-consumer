@@ -188,9 +188,12 @@ class TopicManager(Thread):
                     if (type(union_type) is dict and
                             union_type.get('type') == 'array'):
                         field_type = union_type.get('items')
-                        resource_field_type = '_{0}'.format(
-                            avroToPostgresPrimitiveTypes.get(field_type)
-                        )
+                        if not isinstance(field_type, dict):
+                            resource_field_type = '_{0}'.format(
+                                avroToPostgresPrimitiveTypes.get(field_type)
+                            )
+                        else:
+                            resource_field_type = 'json'
                         break
 
                 if resource_field_type:
@@ -206,7 +209,11 @@ class TopicManager(Thread):
                 elif 'string' in union_types:
                     resource_field_type = \
                         avroToPostgresPrimitiveTypes.get('string')
+
+                elif isinstance(union_types[1], dict):
+                    resource_field_type = 'json'
                 else:
+                    self.logger.info(union_types)
                     resource_field_type = \
                         avroToPostgresPrimitiveTypes.get(union_types[1])
 
