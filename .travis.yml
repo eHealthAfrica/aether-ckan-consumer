@@ -4,6 +4,8 @@ python:
 services:
 - docker
 cache: pip
+before_script:
+- docker login -u ehealthafricadevops -p $DOCKER_HUB_PASSWORD
 install: bash bin/travis-build.bash
 script: sh bin/travis-run.sh
 
