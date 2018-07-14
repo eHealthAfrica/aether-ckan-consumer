@@ -126,6 +126,7 @@ class ServerManager(object):
 
         try:
             consumer.subscribe(topic)
+            consumer.poll(timeout_ms=100)
             consumer.seek_to_beginning()
             poll_result = consumer.poll_and_deserialize(
                 timeout_ms=1000,
