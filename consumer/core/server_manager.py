@@ -126,8 +126,16 @@ class ServerManager(object):
 
         try:
             consumer.subscribe(topic)
-            consumer.poll(timeout_ms=100)
-            consumer.seek_to_beginning()
+            retry = 30
+            for x in range(retry):
+                res = consumer.poll(timeout_ms=1000)
+                if res:
+                    break
+                sleep(1)
+            try:
+                consumer.seek_to_beginning()
+            except AssertionError:
+                raise IOError('Could not connect to Kafka partition for topic %s' % topic)
             poll_result = consumer.poll_and_deserialize(
                 timeout_ms=1000,
                 max_records=1)
