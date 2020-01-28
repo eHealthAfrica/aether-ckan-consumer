@@ -1,0 +1,73 @@
+#########################################################################################
+#                                                                              		    #
+#                              Frozen requirements                             		    #
+#                                                                              		    #
+#                               DO NOT CHANGE !!!                              		    #
+#                                                                              		    #
+# To update this first update 'primary-requirements.txt'                       		    #
+# then run 'docker-compose run ckan-consumer pip_freeze'                                #
+#                                                                              		    #
+#########################################################################################
+aet.consumer==3.4.1
+aether.python==1.0.17
+atomicwrites==1.1.5
+attrs==18.1.0
+beautifulsoup4==4.8.0
+birdisle==0.1.3
+blessings==1.7
+certifi==2019.3.9
+cffi==1.13.0
+chardet==3.0.4
+ckanapi==4.3
+Click==7.0
+confluent-kafka==1.1.0
+coverage==5.0
+decorator==4.3.0
+deepmerge==0.1.0
+docopt==0.6.2
+eha-jsonpath==0.5.1
+elasticsearch==7.5.1
+entrypoints==0.3
+flake8==3.7.9
+flake8-quotes==2.1.1
+Flask==1.1.1
+idna==2.7
+importlib-metadata==0.17
+itsdangerous==1.1.0
+Jinja2==2.10.1
+jsonpath-ng==1.4.3
+jsonschema==3.2.0
+kafka-python==1.4.6
+MarkupSafe==1.1.1
+mccabe==0.6.1
+mock==3.0.5
+more-itertools==4.1.0
+packaging==19.0
+pbr==4.0.3
+pluggy==0.12.0
+ply==3.11
+py==1.5.3
+pycodestyle==2.5.0
+pycparser==2.19
+pyflakes==2.1.1
+pyparsing==2.4.0
+pyrsistent==0.15.4
+pytest==5.3.4
+pytest-cov==2.8.1
+pytest-runner==5.2
+python-slugify==4.0.0
+redis==3.3.8
+requests==2.22.0
+responses==0.10.9
+six==1.11.0
+soupsieve==1.9.3
+spavro==1.1.17
+SQLAlchemy==1.3.13
+text-unidecode==1.3
+urllib3==1.23
+waitress==1.3.1
+wcwidth==0.1.7
+WebOb==1.8.5
+WebTest==2.0.33
+Werkzeug==0.15.6
+zipp==0.5.1

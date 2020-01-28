@@ -17,3 +17,17 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+from setuptools import setup
+setup(
+    name='aether_elasticsearch_consumer',
+    author='eHealth Africa',
+    author_email='aether@ehealthafrica.org',
+    decription='Aether CKAN Kafka consumer',
+    version='2.0.0',
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest', 'pytest-cov'],
+    url='https://github.com/eHealthAfrica/aether-ckan-consumer',
+    keywords=['aet', 'aether', 'kafka', 'consumer', 'ckan'],
+    classifiers=[]
+)

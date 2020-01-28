@@ -1,18 +1,24 @@
 language: python
 python:
-  - "2.7"
+  - "3.7"
 services:
 - docker
 cache: pip
 before_script:
 - docker login -u ehealthafricadevops -p $DOCKER_HUB_PASSWORD
-install: bash bin/travis-build.bash
-script: sh bin/travis-run.sh
 
-deploy:
-- provider: script
-  script: "./scripts/release.sh"
-  skip_cleanup: true
-  on:
-    all_branches: true
-    condition: ($TRAVIS_BRANCH =~ ^release\-[0-9]+\.[0-9]+[\.0-9]*$) || ($TRAVIS_TAG =~ ^[0-9]+\.[0-9]+[\.0-9]*$)
+matrix:
+  fast_finish: true
+  include:
+
+    - name: "Test"
+      stage: test
+      install: true
+      script: "./scripts/run_travis.sh"
+
+    - name: "Release"
+      stage: deploy
+      install: true
+      script: "./scripts/release.sh"
+      # release only if tag like #.#.#
+      if: (tag =~ ^[0-9]+(\.[0-9]+){2}$)

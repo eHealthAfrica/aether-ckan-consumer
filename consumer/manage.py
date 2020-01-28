@@ -13,7 +13,22 @@
 #
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
-# 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+from time import sleep
+from app.consumer import CKANConsumer
+from app.config import consumer_config, kafka_config
+
+if __name__ == '__main__':
+    manager = CKANConsumer(consumer_config, kafka_config)
+    while True:
+        try:
+            for x in range(10):
+                sleep(1)
+            else:
+                break
+        except KeyboardInterrupt:
+            manager.stop()
