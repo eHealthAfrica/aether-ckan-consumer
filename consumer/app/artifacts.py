@@ -74,76 +74,49 @@ class CKANInstance(BaseResource):
     public_actions = BaseResource.public_actions + [
         'test_connection'
     ]
-    base = declarative_base()
+    session: requests.Session() = None
 
-    session: sessionmaker = None
-    engine: create_engine = None
-
-    @lock
     def get_session(self):
         if self.session:
             return self.session
-        for i in self.definition:
-            print(i, self.definition[i])
-        url = self.definition.db_url
-        connect_args = {
-            'check_same_thread': False
-        }
-        engine = create_engine(url, **connect_args)
+        self.session = requests.Session()
         try:
-            LOG.info('Connecting to DB @ %s' % url)
-
-            self.base.metadata.create_all(engine)
-            self.session = sessionmaker(bind=engine)
-
-            LOG.info('Database initialized.')
-        except SQLAlchemyError as sar:
-            LOG.error('Database could not be initialized: %s' % sar)
-            raise sar
-        # add an _id so we can check the instance
-        setattr(self.session, 'instance_id', str(uuid4()))
+            self.session.auth = (
+                self.definition.user,
+                self.definition.password
+            )
+        except AttributeError:
+            pass  # may not need creds
         return self.session
 
-    def test_connection(self, *args, **kwargs):
-        LOG.debug('Checking...1')
+    @lock
+    def request(self, method, url, **kwargs):
         try:
-            ckan = self.get_session()
-        except Exception as e:
-            traceback.print_exc()
-        url = '{0}/api/action/status_show'.format(self.definition.url)
-        response = None
-
-        print('FROM HERE', url, flush=True)
-
-        for i in range(CONN_RETRY):
-            try:
-                response = requests.get(url)
-                break
-            except ConnectionError:
-                self.logger.error('Server {0} not available. Retrying...'
-                                  .format(url))
-                sleep(CONN_RETRY_WAIT_TIME)
-
-        if response is None:
-            self.logger.error('Server {0} not available.'
-                              .format(url))
-            return False
-
-        if response.status_code != 200:
-            self.logger.error('Response for {0} not successful.'.format(url))
-            return False
-
+            session = self.get_session()
+        except Exception as err:
+            raise ConsumerHttpException(str(err), 500)
+        full_url = f'{self.definition.url}{url}'
+        res = session.request(method, full_url, **kwargs)
         try:
-            data = response.json()
-        except (ValueError, TypeError):
-            self.logger.error('Expected JSON response for {0}.'.format(url))
-            return False
+            res.raise_for_status()
+        except Exception:
+            raise ConsumerHttpException(str(res.content), res.status_code)
+        return res
 
-        if data.get('success') is True:
-            self.logger.info('Server {0} available.'.format(url))
-            return True
-
-        return False
+    def test_connection(self, *args, **kwargs) -> bool:
+        try:
+            res = self.request('head', '')
+        except requests.exceptions.ConnectionError as her:
+            raise ConsumerHttpException(str(her), 500)
+        except Exception as err:
+            LOG.debug(f'Error testing ckan connection {err}, {type(err)}')
+            raise ConsumerHttpException(err, 500)
+        try:
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as her:
+            LOG.debug(f'Error testing ckan connection {her}')
+            raise ConsumerHttpException(her, her.response.status_code)
+        return True
 
 
 class DBInstance(BaseResource):
@@ -163,10 +136,7 @@ class DBInstance(BaseResource):
         if self.session:
             return self.session
         url = self.definition.url
-        connect_args = {
-            'check_same_thread': False
-        }
-        engine = create_engine(url, **connect_args)
+        engine = create_engine(url)
         try:
             LOG.info('Connecting to DB @ %s' % url)
 
