@@ -33,6 +33,7 @@ kafka_admin_uses = [
     'sasl.password'
 ]
 
+
 def load_config():
     CONSUMER_CONFIG_PATH = os.environ.get('CKAN_CONSUMER_CONFIG_PATH', None)
     KAFKA_CONFIG_PATH = os.environ.get('CKAN_CONSUMER_KAFKA_CONFIG_PATH', None)
@@ -74,5 +75,6 @@ def get_kafka_admin_config():
 
 def get_consumer_config():
     return consumer_config
+
 
 load_config()

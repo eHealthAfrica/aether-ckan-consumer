@@ -61,23 +61,13 @@ CKAN_INSTANCE = '''
       ],
       "pattern": "^(.*)$"
     },
-    "user": {
-      "$id": "#/properties/user",
+    "key": {
+      "$id": "#/properties/key",
       "type": "string",
-      "title": "The User Schema",
+      "title": "The CKAN API Key",
       "default": "",
       "examples": [
-        "username for auth"
-      ],
-      "pattern": "^(.*)$"
-    },
-    "password": {
-      "$id": "#/properties/password",
-      "type": "string",
-      "title": "The Password Schema",
-      "default": "",
-      "examples": [
-        "password for auth"
+        "api key for auth"
       ],
       "pattern": "^(.*)$"
     }
@@ -211,86 +201,6 @@ SUBSCRIPTION = '''
           }
         }
       }
-    },
-    "visualizations": {
-      "$id": "#/properties/visualizations",
-      "type": "array",
-      "title": "The Visualizations Schema",
-      "items": {
-        "$id": "#/properties/visualizations/items",
-        "type": "object",
-        "title": "The Items Schema",
-        "required": [
-          "name",
-          "title",
-          "type",
-          "source_field",
-          "field_overrides"
-        ],
-        "properties": {
-          "name": {
-            "$id": "#/properties/visualizations/items/properties/name",
-            "type": "string",
-            "title": "The Name Schema",
-            "default": "",
-            "examples": [
-              "name of the visualization"
-            ],
-            "pattern": "^(.*)$"
-          },
-          "title": {
-            "$id": "#/properties/visualizations/items/properties/title",
-            "type": "string",
-            "title": "The Title Schema",
-            "default": "",
-            "examples": [
-              "title of the visualization"
-            ],
-            "pattern": "^(.*)$"
-          },
-          "type": {
-            "$id": "#/properties/visualizations/items/properties/type",
-            "type": "string",
-            "title": "The Type Schema",
-            "default": "",
-            "examples": [
-              "the ckan visual type to create"
-            ],
-            "pattern": "^(.*)$"
-          },
-          "source_field": {
-            "$id": "#/properties/visualizations/items/properties/source_field",
-            "type": "string",
-            "title": "The Source_field Schema",
-            "default": "",
-            "examples": [
-              "which attribute in the source are we plotting"
-            ],
-            "pattern": "^(.*)$"
-          },
-          "field_overrides": {
-            "$id": "#/properties/visualizations/items/properties/field_overrides",
-            "type": "array",
-            "title": "The Field_overrides Schema",
-            "items": {
-              "$id": "#/properties/visualizations/items/properties/field_overrides/items",
-              "type": "array",
-              "title": "The Items Schema",
-              "items": {
-                "$id": "#/properties/visualizations/items/properties/field_overrides/items/items",
-                "type": "string",
-                "title": "The Items Schema",
-                "default": "",
-                "examples": [
-                  "field1_to_set",
-                  "value"
-                ],
-                "pattern": "^(.*)$"
-              }
-            }
-          }
-        }
-      }
     }
   }
 }
@@ -307,7 +217,7 @@ CKAN_JOB = '''
     "required": [
       "id",
       "name",
-      "ckan",
+      "ckan"
     ],
     "properties": {
       "id": {

@@ -7,8 +7,6 @@ services:
     stdin_open: true
     volumes:
       - ./consumer:/code
-      - ./conf:/srv/app/config
     environment:
-      - PYTHONUNBUFFERED=1
-      - ENVIRONMENT=development
+      - PYTHONUNBUFFERED=0
     command: start

@@ -7,14 +7,14 @@ show_help() {
     echo """
     Commands
     ----------------------------------------------------------------------------
-    bash          : run bash
-    build         : build python wheel of library in /dist
-    eval          : eval shell command
-    pip_freeze    : freeze pip dependencies and write to requirements.txt
-    start         : run application
-    test_unit     : run tests
-    test_lint     : run flake8 tests
-    test_coverage : run tests with coverage output
+    bash                : run bash
+    build               : build python wheel of library in /dist
+    eval                : eval shell command
+    pip_freeze          : freeze pip dependencies and write to requirements.txt
+    start               : run application
+    test_unit           : run tests
+    test_lint           : run flake8 tests
+    test_integration    : run tests with coverage output
 
     """
 }

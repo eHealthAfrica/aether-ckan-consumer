@@ -20,7 +20,7 @@
 
 from setuptools import setup
 setup(
-    name='aether_elasticsearch_consumer',
+    name='aether_ckan_consumer',
     author='eHealth Africa',
     author_email='aether@ehealthafrica.org',
     decription='Aether CKAN Kafka consumer',

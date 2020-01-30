@@ -21,6 +21,6 @@
 
 set -Eeuo pipefail
 
-docker-compose -f ./docker-compose-test.yml up -d ckan
+docker-compose -f ./docker-compose-test.yml up -d ckan-test
 docker-compose -f ./docker-compose-test.yml run --rm consumer-test test_integration
 docker-compose -f docker-compose-test.yml down

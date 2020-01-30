@@ -11,21 +11,10 @@ services:
       file: docker-compose-base.yml
       service: ckan-consumer-base
     environment:
-      CONSUMER_CONF_DIR: /srv/app
       CKAN_CONSUMER_CONFIG_PATH: "/code/conf/consumer/consumer.json"
       CKAN_CONSUMER_KAFKA_CONFIG_PATH: "/code/conf/consumer/kafka.json"
       LOG_LEVEL: "DEBUG"
-      EXPOSE_PORT: 9009
-
-      ADMIN_USER: admin
-      ADMIN_PW: password1
-
-      CONSUMER_NAME: 'CKAN-CONSUMER'
-
-      REDIS_DB: 0
-      REDIS_HOST: localhost
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: password
+      CONSUMER_PORT: 9009
     networks:
       - aether
     ports:

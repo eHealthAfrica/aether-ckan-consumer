@@ -18,67 +18,30 @@
 # specific language governing permissions and limitations
 # under the License.
 
-ES_INSTANCE = {
-    'id': 'es-test',
-    'name': 'Test ES Instance',
-    'url': 'http://elasticsearch',
-    'user': 'admin',
-    'password': 'admin'
-}
-
-KIBANA_INSTANCE = {
-    'id': 'k-test',
-    'name': 'Test Kibana Instance',
-    'url': 'http://kibana:5601/kibana-app',
-    'user': 'admin',
-    'password': 'admin'
-}
-
-LOCAL_ES_INSTANCE = {
-    'id': 'default',
-    'name': 'Test LOCAL ES Instance'
-}
-
-LOCAL_KIBANA_INSTANCE = {
-    'id': 'default',
-    'name': 'Test LOCAL Kibana Instance'
+CKAN_INSTANCE = {
+    'id': 'ckan-id',
+    'name': 'Test CKAN Instance',
+    'url': 'http://ckan:5000',
+    'key': 'ckan_api_key'
 }
 
 SUBSCRIPTION = {
-    'id': 'sub-test',
+    'id': 'sub-id',
     'name': 'Test Subscription',
     'topic_pattern': '*',
     'topic_options': {
-        'masking_annotation': '@aether_masking',  # schema key for mask level of a field
-        'masking_levels': ['public', 'private'],  # classifications
-        'masking_emit_level': 'public',           # emit from this level ->
-        'filter_required': True,                 # filter on a message value?
-        'filter_field_path': 'operational_status',    # which field?
-        'filter_pass_values': ['operational'],             # what are the passing values?
-    },
-    'es_options': {
-        'alias_name': 'test',
-        'auto_timestamp': True,
-        'geo_point_creation': True,
-        'geo_point_name': 'geopoint'
-    },
-    'kibana_options': {
-        'auto_vizualization': 'schema'  # enum ['full', 'schema', 'none']
-    },
-    'visualizations': []  # manual visualizations
+        'masking_annotation': '@aether_masking',    # schema key for mask level of a field
+        'masking_levels': ['public', 'private'],    # classifications
+        'masking_emit_level': 'public',             # emit from this level ->
+        'filter_required': True,                    # filter on a message value?
+        'filter_field_path': 'operational_status',  # which field?
+        'filter_pass_values': ['operational'],      # what are the passing values?
+    }
 }
 
 JOB = {
-    'id': 'default',
-    'name': 'Default ES Consumer Job',
-    'local_kibana': 'default',
-    'local_elasticsearch': 'default'
-}
-
-JOB_FOREIGN = {
-    'id': 'j-test-foreign',
-    'name': 'Default ES Consumer Job',
-    'kibana': 'k-test',
-    'elasticsearch': 'es-test',
-    'subscription': ['sub-test']
+    'id': 'job-id',
+    'name': 'CKAN Consumer Job',
+    'ckan': 'ckan-id',
+    'subscription': ['sub-id']
 }
