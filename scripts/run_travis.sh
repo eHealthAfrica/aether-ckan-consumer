@@ -20,6 +20,6 @@
 #
 set -Eeuo pipefail
 
-docker-compose -f ./docker-compose-test.yml up -d ckan
+docker-compose -f ./docker-compose-test.yml up -d ckan-test
 scripts/run_unit_tests.sh
 scripts/run_integration_tests.sh
