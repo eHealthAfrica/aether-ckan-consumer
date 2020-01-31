@@ -1,15 +1,15 @@
 #################################################################################################
-#                                                                              					#
-#                             Primary requirements                             					#
-#                                                                              					#
-#                                 CHANGE ME !!!                                					#
+#                                                                                               #
+#                             Primary requirements                                              #
+#                                                                                               #
+#                                 CHANGE ME !!!                                                 #
 #                                                                                               #
 #                                                                                               #
 # To check the outdated dependencies run                                                        #
 #       docker-compose run --rm --no-deps ckan-consumer eval pip list --outdated                #
 # Update me and then run                                                                        #
 #       docker-compose run --rm ckan-consumer pip_freeze                                        #
-#                                                                              					#
+#                                                                                               #
 #################################################################################################
 
 
