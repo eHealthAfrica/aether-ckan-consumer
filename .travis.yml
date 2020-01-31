@@ -38,7 +38,7 @@ jobs:
       script: "./scripts/run_travis.sh"
 
     - name: "Release"
-      stage: deploy
+      stage: release
       script: "./scripts/release.sh"
 
 install: true
