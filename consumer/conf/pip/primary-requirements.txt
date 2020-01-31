@@ -8,21 +8,24 @@
 # To check the outdated dependencies run                                                        #
 #       docker-compose run --rm --no-deps ckan-consumer eval pip list --outdated                #
 # Update me and then run                                                                        #
-#       docker-compose run --rm ckan-consumer pip_freeze                                             #
+#       docker-compose run --rm ckan-consumer pip_freeze                                        #
 #                                                                              					#
 #################################################################################################
 
+
+# Consumer
 aet.consumer >= 3.4.1
 aether-python
 ckanapi
 deepmerge
 eha_jsonpath
+jsonschema
+requests
+responses
+
+# Tests
 flake8
 flake8-quotes
-jsonschema
 pytest
 pytest-cov
 pytest-runner
-requests
-responses
-sqlalchemy

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2019 by eHealth Africa : http://www.eHealthAfrica.org
+# Copyright (C) 2020 by eHealth Africa : http://www.eHealthAfrica.org
 #
 # See the NOTICE file distributed with this work for additional information
 # regarding copyright ownership.
@@ -199,6 +199,42 @@ SUBSCRIPTION = '''
               false
             ]
           }
+        }
+      }
+    },
+    "target_options": {
+      "$id": "#/properties/target_options",
+      "type": "object",
+      "title": "The Target_options Schema",
+      "anyOf": [
+        {"required": [
+          "dataset_name"
+        ]}
+      ],
+      "dependencies":{
+        "dataset_name": ["default_read_level"]
+      },
+      "properties": {
+        "dataset_name": {
+          "$id": "#/properties/target_options/properties/dataset_name",
+          "type": "string",
+          "title": "The Dataset_name Schema",
+          "default": "",
+          "examples": [
+            "Topic Name"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "default_read_level": {
+          "$id": "#/properties/target_options/properties/default_read_level",
+          "type": "string",
+          "title": "The dataset read level",
+          "default": "public",
+          "examples": [
+            "public",
+            "private"
+          ],
+          "pattern": "^(.*)$"
         }
       }
     }

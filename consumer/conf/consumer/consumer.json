@@ -1,7 +1,5 @@
 {
-    "title": "CKAN portal",
-    "url": "http://ckan:5000",
-    "api_key": "49d4cd30-85ab-467f-8710-676f0ce55df1",
+    "name": "CKAN_CONSUMER",
     "autoconfig_datasets" : true,
     "autoconfig_owner_org": "ehademo"
 }

@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-# Copyright (C) 2019 by eHealth Africa : http://www.eHealthAfrica.org
+# Copyright (C) 2020 by eHealth Africa : http://www.eHealthAfrica.org
 #
 # See the NOTICE file distributed with this work for additional information
 # regarding copyright ownership.
@@ -34,7 +32,7 @@ from aet.exceptions import ConsumerHttpException
 from aet.job import BaseJob, JobStatus
 from aet.kafka import KafkaConsumer, FilterConfig, MaskConfig
 from aet.logger import callback_logger, get_logger
-from aet.resource import BaseResource, lock
+from aet.resource import BaseResource
 
 from app.config import get_kafka_config
 from app.fixtures import schemas
@@ -68,7 +66,6 @@ class CKANInstance(BaseResource):
         setattr(self.session, 'instance_id', str(uuid4()))
         return self.session
 
-    @lock
     def request(self, method, url, **kwargs):
         try:
             session = self.get_session()

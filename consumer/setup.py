@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2018 by eHealth Africa : http://www.eHealthAfrica.org
+# Copyright (C) 2020 by eHealth Africa : http://www.eHealthAfrica.org
 #
 # See the NOTICE file distributed with this work for additional information
 # regarding copyright ownership.
@@ -25,7 +25,16 @@ setup(
     author_email='aether@ehealthafrica.org',
     decription='Aether CKAN Kafka consumer',
     version='2.0.0',
-    setup_requires=['pytest-runner'],
+    install_requires=[
+        'aet.consumer>=3.4.1',
+        'aether-python',
+        'ckanapi',
+        'deepmerge',
+        'eha_jsonpath',
+        'jsonschema',
+        'requests',
+        'responses',
+    ],
     tests_require=['pytest', 'pytest-cov'],
     url='https://github.com/eHealthAfrica/aether-ckan-consumer',
     keywords=['aet', 'aether', 'kafka', 'consumer', 'ckan'],
