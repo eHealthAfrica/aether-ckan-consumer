@@ -26,20 +26,20 @@ CKAN_INSTANCE = {
 }
 
 SUBSCRIPTION = {
-    "id": "sub-id",
-    "name": "Test Subscription",
-    "topic_pattern": "*",
-    "topic_options": {
-        "masking_annotation": "@aether_masking",    # schema key for mask level of a field
-        "masking_levels": ["public", "private"],    # classifications
-        "masking_emit_level": "public",             # emit from this level ->
-        "filter_required": True,                    # filter on a message value?
-        "filter_field_path": "operational_status",  # which field?
-        "filter_pass_values": ["operational"],      # what are the passing values?
+    'id': 'sub-id',
+    'name': 'Test Subscription',
+    'topic_pattern': '*',
+    'topic_options': {
+        'masking_annotation': '@aether_masking',    # schema key for mask level of a field
+        'masking_levels': ['public', 'private'],    # classifications
+        'masking_emit_level': 'public',             # emit from this level ->
+        'filter_required': True,                    # filter on a message value?
+        'filter_field_path': 'operational_status',  # which field?
+        'filter_pass_values': ['operational'],      # what are the passing values?
     },
-    "target_options": {
-        "dataset_name": "a name for the dataset",           # Name of target ckan dataset
-        "default_read_level": "public"              # Access level of dataset
+    'target_options': {
+        'dataset_name': 'a name for the dataset',           # Name of target ckan dataset
+        'default_read_level': 'public'              # Access level of dataset
     }
 }
 

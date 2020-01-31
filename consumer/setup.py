@@ -18,13 +18,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import os
 from setuptools import setup
+
+VERSION = os.environ.get('VERSION', '0.0.0')
+
 setup(
     name='aether_ckan_consumer',
     author='eHealth Africa',
     author_email='aether@ehealthafrica.org',
     decription='Aether CKAN Kafka consumer',
-    version='2.0.0',
+    version=VERSION,
     install_requires=[
         'aet.consumer>=3.4.1',
         'aether-python',
