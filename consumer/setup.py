@@ -39,7 +39,13 @@ setup(
         'requests',
         'responses',
     ],
-    tests_require=['pytest', 'pytest-cov'],
+    tests_require=[
+        'flake8',
+        'flake8-quotes',
+        'pytest',
+        'pytest-cov',
+        'pytest-runner',
+    ],
     url='https://github.com/eHealthAfrica/aether-ckan-consumer',
     keywords=['aet', 'aether', 'kafka', 'consumer', 'ckan'],
     classifiers=[]
