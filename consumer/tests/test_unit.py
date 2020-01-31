@@ -19,8 +19,9 @@
 # under the License.
 
 import os
+import pytest
 
-from . import *  # noqa # get all test assets from tests/__init__.py
+from . import KAFKA_CONFIG  # noqa # get all test assets from tests/__init__.py
 from unittest import TestCase
 
 # Test Suite contains both unit and integration tests
@@ -36,6 +37,7 @@ from unittest import TestCase
 class ConsumerTest(TestCase):
 
     @pytest.mark.unit
+    @pytest.mark.integration
     def test__get_config_alias(self):
         ckan_servers = KAFKA_CONFIG.get('bootstrap.servers')
         self.assertIsNotNone(ckan_servers)

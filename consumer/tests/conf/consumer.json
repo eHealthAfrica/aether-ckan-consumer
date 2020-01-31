@@ -1,5 +1,5 @@
 {
-    "url": "http://ckan:5000",
+    "url": "http://ckan-test:5001",
     "latitude_fields": ["lat", "latitude"],
 	"longitude_fields": ["lon", "lng", "long", "longitude"],
 	"log_level": "debug"
