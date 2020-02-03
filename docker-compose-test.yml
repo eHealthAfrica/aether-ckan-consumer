@@ -28,46 +28,6 @@ services:
       SASL.USERNAME: root
       SASL.PASSWORD: 09049a938686107c15ed6748010e2f1b
 
-  ckan-test:
-    image: ehealthafrica/ckan:2.8.0-rc
-    environment:
-      # Defaults work with linked containers, change to use own Postgres, SolR, Redis or Datapusher
-      - DATASTORE_READONLY_PASSWORD=datastore
-      - DS_RO_PASS=datastore
-      - CKAN_SITE_URL=http://ckan-test:5001
-      - CKAN_PORT=5001
-      - CKAN_MAX_UPLOAD_SIZE_MB=20000
-      - CKAN_SQLALCHEMY_URL=postgresql://ckan:ckan@ckanpg-test/ckan
-      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:ckan@ckanpg-test/datastore
-      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:datastore@ckanpg-test/datastore
-      - CKAN_SOLR_URL=http://solr-test:8984/solr/ckan
-      - CKAN_REDIS_URL=redis://redis:6380/2
-      - CKAN_DATAPUSHER_URL=http://datapusher:8801
-      - POSTGRES_PASSWORD=testpassword
-    depends_on:
-      - ckanpg-test
-      - solr-test
-      - redis-test
-    ports:
-      - 5001:5001
-    restart: on-failure
-
-  ckanpg-test:
-    build:
-      context: .
-      dockerfile: consumer/tests/ckan/postgresql/Dockerfile
-      args:
-        - DS_RO_PASS=datastore
-        - POSTGRES_PASSWORD=ckan
-    environment:
-      - DS_RO_PASS=datastore
-      - POSTGRES_PASSWORD=ckan
-
-  solr-test:
-    build:
-      context: .
-      dockerfile: consumer/tests/ckan/solr/Dockerfile
-
   redis-test:
     image: redis:alpine
     command: >
