@@ -38,8 +38,19 @@ SUBSCRIPTION = {
         'filter_pass_values': ['operational'],      # what are the passing values?
     },
     'target_options': {
-        'dataset_name': 'a name for the dataset',           # Name of target ckan dataset
-        'default_read_level': 'public'              # Access level of dataset
+        'dataset_metadata': {
+            'title': 'Pollution in Nigeria',
+            'name': 'pollution-in-nigeria111',
+            'owner_org': 'eHA ',
+            'notes': 'Some description',
+            'author': 'eHealth Africa',
+            'private': False,
+        },
+        'resource_metadata': {
+            'title': 'Sensor data',
+            'description': 'Sensor data from wind turbines',
+            'name': 'sensor-data'
+        },
     }
 }
 

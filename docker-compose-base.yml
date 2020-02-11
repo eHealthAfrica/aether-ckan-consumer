@@ -8,5 +8,5 @@ services:
     volumes:
       - ./consumer:/code
     environment:
-      - PYTHONUNBUFFERED=0
+      PYTHONUNBUFFERED: 0
     command: start

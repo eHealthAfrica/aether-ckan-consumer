@@ -85,7 +85,8 @@ SUBSCRIPTION = '''
   "required": [
     "id",
     "name",
-    "topic_pattern"
+    "topic_pattern",
+    "target_options"
   ],
   "properties": {
     "id": {
@@ -208,33 +209,143 @@ SUBSCRIPTION = '''
       "title": "The Target_options Schema",
       "anyOf": [
         {"required": [
-          "dataset_name"
+          "dataset_metadata",
+          "resource_metadata"
         ]}
       ],
       "dependencies":{
         "dataset_name": ["default_read_level"]
       },
       "properties": {
-        "dataset_name": {
-          "$id": "#/properties/target_options/properties/dataset_name",
-          "type": "string",
-          "title": "The Dataset_name Schema",
-          "default": "",
-          "examples": [
-            "Topic Name"
-          ],
-          "pattern": "^(.*)$"
+        "dataset_metadata": {
+          "$id": "#/properties/target_options/properties/dataset_metadata",
+          "type": "object",
+          "title": "The Dataset_metadata Schema",
+          "anyOf": [
+                {"required": [
+                "title",
+                "name",
+                "owner_org",
+                "private"
+                ]}
+            ],
+          "examples": {
+                "title": "Pollution in Nigeria",
+                "name": "pollution-in-nigeria111",
+                "owner_org": "eHA ",
+                "notes": "Some description",
+                "author": "eHealth Africa",
+                "private": false
+            },
+            "properties": {
+                "title": {
+                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/title",
+                    "type": "string",
+                    "title": "The dataset_metadata title Schema",
+                    "default": "",
+                    "examples": [
+                        "dataset title"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "name": {
+                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/name",
+                    "type": "string",
+                    "title": "The dataset_metadata name Schema",
+                    "default": "",
+                    "examples": [
+                        "dataset name"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "owner_org": {
+                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/owner_org",
+                    "type": "string",
+                    "title": "The dataset_metadata owner's org Schema",
+                    "default": "",
+                    "examples": [
+                        "dataset owner's organization"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "notes": {
+                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/notes",
+                    "type": "string",
+                    "title": "The dataset_metadata notes Schema",
+                    "default": "",
+                    "examples": [
+                        "dataset notes"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "author": {
+                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/author",
+                    "type": "string",
+                    "title": "The dataset_metadata author Schema",
+                    "default": "",
+                    "examples": [
+                        "dataset author"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "private": {
+                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/private",
+                    "type": "boolean",
+                    "title": "The dataset_metadata private Schema",
+                    "default": "",
+                    "examples": [
+                        false
+                    ]
+                }
+            }
         },
-        "default_read_level": {
-          "$id": "#/properties/target_options/properties/default_read_level",
-          "type": "string",
-          "title": "The dataset read level",
-          "default": "public",
-          "examples": [
-            "public",
-            "private"
-          ],
-          "pattern": "^(.*)$"
+        "resource_metadata": {
+          "$id": "#/properties/target_options/properties/resource_metadata",
+          "type": "object",
+          "title": "The Resource_metadata Schema",
+          "anyOf": [
+                {"required": [
+                "title",
+                "name"
+                ]}
+            ],
+          "examples": {
+                "title": "Sensor data",
+                "name": "sensor-data",
+                "description": "Sensor data from wind turbines"
+            },
+            "properties": {
+                "title": {
+                    "$id": "#/properties/target_options/properties/resource_metadata/properties/title",
+                    "type": "string",
+                    "title": "The resource_metadata title Schema",
+                    "default": "",
+                    "examples": [
+                        "resource title"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "name": {
+                    "$id": "#/properties/target_options/properties/resource_metadata/properties/name",
+                    "type": "string",
+                    "title": "The resource_metadata name Schema",
+                    "default": "",
+                    "examples": [
+                        "resource name"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "description": {
+                    "$id": "#/properties/target_options/properties/resource_metadata/properties/description",
+                    "type": "string",
+                    "title": "The resource_metadata description Schema",
+                    "default": "",
+                    "examples": [
+                        "resource description"
+                    ],
+                    "pattern": "^(.*)$"
+                }
+            }
         }
       }
     }

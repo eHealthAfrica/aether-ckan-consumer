@@ -18,14 +18,19 @@
 
 import fnmatch
 import requests
+import json
+import traceback
 from time import sleep
 from typing import (
     Callable,
     List
 )
 from uuid import uuid4
+from ast import literal_eval
 
 from confluent_kafka import KafkaException
+from ckanapi import RemoteCKAN
+from ckanapi import errors as ckanapi_errors
 
 # Consumer SDK
 from aet.exceptions import ConsumerHttpException
@@ -34,12 +39,14 @@ from aet.kafka import KafkaConsumer, FilterConfig, MaskConfig
 from aet.logger import callback_logger, get_logger
 from aet.resource import BaseResource
 
-from app.config import get_kafka_config
+from app.config import get_kafka_config, get_consumer_config
 from app.fixtures import schemas
+from app.utils import extract_fields_from_schema, prepare_fields_for_resource
 
 
 LOG = get_logger('artifacts')
 KAFKA_CONFIG = get_kafka_config()
+CONSUMER_CONFIG = get_consumer_config()
 
 
 class CKANInstance(BaseResource):
@@ -124,9 +131,7 @@ class CKANJob(BaseJob):
 
     consumer: KafkaConsumer = None
     # processing artifacts
-    _indices: dict
     _schemas: dict
-    _processors: dict
     _doc_types: dict
     _routes: dict
     _previous_topics: list
@@ -135,11 +140,8 @@ class CKANJob(BaseJob):
 
     def _setup(self):
         self.subscribed_topics = {}
-        self._indices = {}
         self._schemas = {}
-        self._processors = {}
-        self._doc_types = {}
-        self._routes = {}
+        self._topic_fields = {}
         self._subscriptions = []
         self._previous_topics = []
         self.log_stack = []
@@ -151,6 +153,8 @@ class CKANJob(BaseJob):
         args['group.id'] = self.group_name
         LOG.debug(args)
         self.consumer = KafkaConsumer(**args)
+        self.rename_fields = {}
+        self.bad_terms = []
 
     def _job_ckan(self, config=None) -> CKANInstance:
         if config:
@@ -222,30 +226,46 @@ class CKANJob(BaseJob):
 
     def _handle_messages(self, config, messages):
         self.log.debug(f'{self.group_name} | reading {len(messages)} messages')
+        ckan_instance = self._job_ckan(config=config)
+        server_url = ckan_instance.definition.get('url')
+        api_key = ckan_instance.definition.get('key')
+        ckan_remote = RemoteCKAN(server_url, apikey=api_key)
         count = 0
+        records = []
+        topic = None
         for msg in messages:
             topic = msg.topic
             schema = msg.schema
             if schema != self._schemas.get(topic):
                 self.log.info(f'{self._id} Schema change on {topic}')
-                self._update_topic(topic, schema)
                 self._schemas[topic] = schema
+                fields, definition_names = extract_fields_from_schema(schema)
+                fields = prepare_fields_for_resource(fields, definition_names)
+                self._topic_fields[topic] = fields
             else:
                 self.log.debug('Schema unchanged.')
-            processor = self._processors[topic]
-            index_name = self._indices[topic]['name']
-            doc_type = self._doc_types[topic]
-            route_getter = self._routes[topic]
-            doc = processor.process(msg.value)
-            self.submit(
-                index_name,
-                doc_type,
-                doc,
+            records.append(msg.value)
+            resource = self.submit_artefacts(
                 topic,
-                route_getter,
+                schema,
+                ckan_remote
             )
             count += 1
-        self.log.info(f'processed {count} {topic} docs in tenant {self.tenant}')
+
+        if resource:
+            self._create_resource_in_datastore(resource, ckan_remote)
+            self.send_data_to_datastore(self._topic_fields[topic], records, resource, ckan_remote)
+        self.log.info(f'processed {count} {topic} docs')
+
+    def submit_artefacts(self, topic, schema, ckan_remote):
+        subscription = self._job_subscription_for_topic(topic)
+        target_options = subscription.definition.get('target_options')
+        target_dataset_metadata = CONSUMER_CONFIG.get('metadata', {})
+        target_dataset_metadata.update(target_options.get('dataset_metadata'))
+        dataset = self._create_dataset_in_ckan(target_dataset_metadata, ckan_remote)
+        if dataset:
+            resource_name = schema.get('name')
+            return self._create_resource_in_ckan(resource_name, dataset, ckan_remote)
 
     # called when a subscription causes a new
     # assignment to be given to the consumer
@@ -293,8 +313,231 @@ class CKANJob(BaseJob):
         except AttributeError as aer:
             self.log.error(f'No topic options for {subscription.id}| {aer}')
 
-    def _name_from_topic(self, topic):
-        return topic.lstrip(f'{self.tenant}.')
+    def _create_dataset_in_ckan(self, dataset, ckan):
+        dataset_name = dataset.get('name').lower()
+        org_name = dataset.get('owner_org').lower()
+        # ckan allows only lower case dataset names
+        dataset.update({
+            'name': dataset_name,
+            'owner_org': org_name
+        })
+
+        try:
+            ckan.action.organization_show(id=org_name)
+        except ckanapi_errors.NotFound:
+            self.log.debug(f'Creating {org_name} organization')
+            try:
+                org = {
+                    'name': org_name,
+                    'state': 'active',
+                }
+                ckan.action.organization_create(**org)
+                self.log.debug(f'Successfully created {org_name} organization')
+            except ckanapi_errors.ValidationError as e:
+                self.log.error(f'Cannot create organization {org_name} because of the following errors: {json.dumps(e.error_dict)}')
+                return
+        except ckanapi_errors.ValidationError as e:
+            self.log.error(
+                f'Could not find {org_name} organization.'
+            )
+            return
+
+        try:
+            return ckan.action.package_show(id=dataset_name)
+        except ckanapi_errors.NotFound:
+            # Dataset does not exist, so continue with execution to create it.
+            pass
+
+        try:
+            new_dataset = ckan.action.package_create(**dataset)
+            self.log.debug(f'Dataset {dataset_name} created in CKAN portal.')
+            return new_dataset
+        except ckanapi_errors.NotAuthorized as e:
+            self.log.error(
+                f'Cannot create dataset {dataset_name}. {str(e)}'
+            )
+        except ckanapi_errors.ValidationError as e:
+            self.log.error(
+                f'Cannot create dataset {dataset_name}. Payload is not valid. Check the following errors: {json.dumps(e.error_dict)}'
+            )
+
+    def _create_resource_in_ckan(self, resource_name, dataset, ckan):
+
+        try:
+            resources = ckan.action.resource_search(query=f'name:{resource_name}')
+            # todo: filter resource on dataset too
+            if resources['count']:
+                return resources['results'][0]
+        except Exception:
+            pass
+
+        try:
+            self.log.debug(f'Creating {resource_name} resource')
+            resource = {
+                'package_id': dataset.get('name'),
+                'name': resource_name,
+                'url_type': 'datastore',
+            }
+            new_resource = ckan.action.resource_create(**resource)
+            self.log.debug(f'Successfully created {resource_name} resource')
+            return new_resource
+        except ckanapi_errors.NotAuthorized as e:
+            self.log.error(f'Cannot create resource {resource_name}. {str(e)}')
+        except ckanapi_errors.ValidationError as e:
+            self.log.error(
+                f'Cannot create resource {resource_name}. Payload is not valid. Check the following errors: {json.dumps(e.error_dict)}'
+            )
+
+    def _create_resource_in_datastore(self, resource, ckan):
+        payload = {
+            'resource_id': resource.get('id'),
+        }
+
+        try:
+            ckan.action.datastore_create(**payload)
+        except ckanapi_errors.CKANAPIError as e:
+            self.log.error(
+                f'An error occurred while creating resource {resource.get("name")} in Datastore. {str(e)}'
+            )
+
+    def send_data_to_datastore(self, fields, records, resource, ckan):
+        resource_id = resource.get('id')
+        resource_name = resource.get('name')
+        payload = {
+            'id': resource_id,
+            'limit': 1,
+        }
+
+        try:
+            response = ckan.action.datastore_search(**payload)
+        except ckanapi_errors.CKANAPIError as e:
+            self.log.error(
+                f'An error occurred while getting Datastore fields for resource {resource_id}. {str(e)}'
+            )
+            return
+
+        new_fields = response.get('fields')
+        new_fields[:] = [field for field in new_fields
+                            if field.get('id') != '_id']
+
+        schema_changes = self.get_schema_changes(new_fields, fields)
+
+        if len(new_fields) == 0 or len(schema_changes) > 0:
+            self.log.info('Datastore detected schema changes')
+            for new_field in schema_changes:
+                new_fields.append(new_field)
+
+            payload = {
+                'resource_id': resource_id,
+                'fields': new_fields,
+            }
+
+            try:
+                ckan.action.datastore_create(**payload)
+            except ckanapi_errors.CKANAPIError as cke:
+                self.log.error(
+                    f'An error occurred while adding new fields for resource {resource_name} in Datastore.'
+                )
+                label = str(cke)
+                self.log.error(
+                    'ResourceType: {0} Error: {1}'
+                    .format(resource_name, label)
+                )
+                bad_fields = literal_eval(label).get('fields', None)
+                if not isinstance(bad_fields, list):
+                    raise ValueError('Bad field could not be identified.')
+                issue = bad_fields[0]
+                bad_term = str(issue.split(" ")[0]).strip("'").strip('"')
+                self.bad_terms.append(bad_term)
+                self.log.info(
+                    'Recovery from error: bad field name %s' % bad_term)
+                self.log.info('Reverting %s' % (schema_changes,))
+                for new_field in schema_changes:
+                    new_fields.remove(new_field)
+                return self.send_data_to_datastore(fields, records, resource, ckan)
+
+        records = self.convert_item_to_array(records, new_fields)
+
+        payload = {
+            'resource_id': resource_id,
+            'method': 'insert',
+            'records': records,
+        }
+
+        try:
+            ckan.action.datastore_upsert(**payload)
+            self.log.info(f'Updated resource {resource_id} in {ckan.address}.')
+        except ckanapi_errors.CKANAPIError as cke:
+            self.log.error(
+                f'An error occurred while inserting data into resource {resource_name}'
+            )
+            self.log.error(
+                f'ResourceType: {resource} Error: {str(cke)}'
+            )
+
+    def get_schema_changes(self, schema, fields):
+        ''' Only check if new field has been added. '''
+
+        new_fields = []
+
+        for field in fields:
+            field_found = False
+
+            for schema_field in schema:
+                if field.get('id') == schema_field.get('id'):
+                    field_found = True
+                    break
+
+            if not field_found:
+                if field.get('id') in self.bad_terms:
+                    new_fields.append(self.rename_field(field))
+                else:
+                    new_fields.append(field)
+
+        return new_fields
+
+    def rename_field(self, field):
+        bad_name = field.get('id')
+        new_name = "ae" + bad_name
+        self.rename_fields[bad_name] = new_name
+        field['id'] = new_name
+        return field
+
+    def convert_item_to_array(self, records, new_fields):
+        ''' If a field is of type array, and the value for it contains a
+        primitive type, then convert it to an array of that primitive type.
+
+        This mutation is required for all records, otherwise CKAN will raise
+        an exception.
+
+        Example:
+            For given field which is of type array of integers
+            {'type': '_int', 'id': 'scores'}
+            Original record {'scores': 10}
+            Changed record {'scores': [10]}
+        '''
+
+        array_fields = []
+        records = records[:]
+
+        for field in new_fields:
+            if field.get('type').startswith('_'):
+                array_fields.append(field.get('id'))
+
+        for record in records:
+            for key, value in record.items():
+                if self.bad_terms:
+                    name = self.rename_fields.get(key, key)
+                    if name != key:
+                        del record[key]
+                else:
+                    name = key
+                if key in array_fields:
+                    record[name] = [value]
+                else:
+                    record[name] = value
+
+        return records
 
     # public
     def list_topics(self, *args, **kwargs):
