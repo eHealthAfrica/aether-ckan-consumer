@@ -26,6 +26,7 @@ avroToPostgresPrimitiveTypes = {
     'bytes': 'bytea',
 }
 
+
 def extract_fields_from_schema(schema):
     fields = []
     definition_names = []
@@ -48,6 +49,7 @@ def extract_fields_from_schema(schema):
                 'type': field.get('type'),
             })
     return fields, definition_names
+
 
 def prepare_fields_for_resource(fields, definition_names):
     resource_fields = []

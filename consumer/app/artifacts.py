@@ -19,7 +19,6 @@
 import fnmatch
 import requests
 import json
-import traceback
 from time import sleep
 from typing import (
     Callable,
@@ -334,11 +333,12 @@ class CKANJob(BaseJob):
                 ckan.action.organization_create(**org)
                 self.log.debug(f'Successfully created {org_name} organization')
             except ckanapi_errors.ValidationError as e:
-                self.log.error(f'Cannot create organization {org_name} because of the following errors: {json.dumps(e.error_dict)}')
+                self.log.error(f'Cannot create organization {org_name} \
+                    because of the following errors: {json.dumps(e.error_dict)}')
                 return
         except ckanapi_errors.ValidationError as e:
             self.log.error(
-                f'Could not find {org_name} organization.'
+                f'Could not find {org_name} organization. {json.dumps(e.error_dict)}'
             )
             return
 
@@ -358,7 +358,8 @@ class CKANJob(BaseJob):
             )
         except ckanapi_errors.ValidationError as e:
             self.log.error(
-                f'Cannot create dataset {dataset_name}. Payload is not valid. Check the following errors: {json.dumps(e.error_dict)}'
+                f'Cannot create dataset {dataset_name}. Payload is not valid. \
+                    Check the following errors: {json.dumps(e.error_dict)}'
             )
 
     def _create_resource_in_ckan(self, resource_name, dataset, ckan):
@@ -385,7 +386,8 @@ class CKANJob(BaseJob):
             self.log.error(f'Cannot create resource {resource_name}. {str(e)}')
         except ckanapi_errors.ValidationError as e:
             self.log.error(
-                f'Cannot create resource {resource_name}. Payload is not valid. Check the following errors: {json.dumps(e.error_dict)}'
+                f'Cannot create resource {resource_name}. Payload is not valid. \
+                    Check the following errors: {json.dumps(e.error_dict)}'
             )
 
     def _create_resource_in_datastore(self, resource, ckan):
@@ -397,7 +399,8 @@ class CKANJob(BaseJob):
             ckan.action.datastore_create(**payload)
         except ckanapi_errors.CKANAPIError as e:
             self.log.error(
-                f'An error occurred while creating resource {resource.get("name")} in Datastore. {str(e)}'
+                f'An error occurred while creating resource \
+                {resource.get("name")} in Datastore. {str(e)}'
             )
 
     def send_data_to_datastore(self, fields, records, resource, ckan):
@@ -412,13 +415,15 @@ class CKANJob(BaseJob):
             response = ckan.action.datastore_search(**payload)
         except ckanapi_errors.CKANAPIError as e:
             self.log.error(
-                f'An error occurred while getting Datastore fields for resource {resource_id}. {str(e)}'
+                f'An error occurred while getting Datastore fields for resource \
+                {resource_id}. {str(e)}'
             )
             return
 
         new_fields = response.get('fields')
-        new_fields[:] = [field for field in new_fields
-                            if field.get('id') != '_id']
+        new_fields[:] = [
+            field for field in new_fields if field.get('id') != '_id'
+        ]
 
         schema_changes = self.get_schema_changes(new_fields, fields)
 
@@ -436,7 +441,8 @@ class CKANJob(BaseJob):
                 ckan.action.datastore_create(**payload)
             except ckanapi_errors.CKANAPIError as cke:
                 self.log.error(
-                    f'An error occurred while adding new fields for resource {resource_name} in Datastore.'
+                    f'An error occurred while adding new fields for resource \
+                    {resource_name} in Datastore.'
                 )
                 label = str(cke)
                 self.log.error(
@@ -447,7 +453,7 @@ class CKANJob(BaseJob):
                 if not isinstance(bad_fields, list):
                     raise ValueError('Bad field could not be identified.')
                 issue = bad_fields[0]
-                bad_term = str(issue.split(" ")[0]).strip("'").strip('"')
+                bad_term = str(issue.split(' ')[0]).strip("'").strip('"')
                 self.bad_terms.append(bad_term)
                 self.log.info(
                     'Recovery from error: bad field name %s' % bad_term)
@@ -498,7 +504,7 @@ class CKANJob(BaseJob):
 
     def rename_field(self, field):
         bad_name = field.get('id')
-        new_name = "ae" + bad_name
+        new_name = 'ae' + bad_name
         self.rename_fields[bad_name] = new_name
         field['id'] = new_name
         return field

@@ -239,7 +239,8 @@ SUBSCRIPTION = '''
             },
             "properties": {
                 "title": {
-                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/title",
+                    "$id": "#/properties/target_options/properties/
+                    dataset_metadata/properties/title",
                     "type": "string",
                     "title": "The dataset_metadata title Schema",
                     "default": "",
@@ -249,7 +250,8 @@ SUBSCRIPTION = '''
                     "pattern": "^(.*)$"
                 },
                 "name": {
-                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/name",
+                    "$id": "#/properties/target_options/properties/
+                    dataset_metadata/properties/name",
                     "type": "string",
                     "title": "The dataset_metadata name Schema",
                     "default": "",
@@ -259,7 +261,8 @@ SUBSCRIPTION = '''
                     "pattern": "^(.*)$"
                 },
                 "owner_org": {
-                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/owner_org",
+                    "$id": "#/properties/target_options/properties/
+                    dataset_metadata/properties/owner_org",
                     "type": "string",
                     "title": "The dataset_metadata owner's org Schema",
                     "default": "",
@@ -269,7 +272,8 @@ SUBSCRIPTION = '''
                     "pattern": "^(.*)$"
                 },
                 "notes": {
-                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/notes",
+                    "$id": "#/properties/target_options/properties/
+                    dataset_metadata/properties/notes",
                     "type": "string",
                     "title": "The dataset_metadata notes Schema",
                     "default": "",
@@ -279,7 +283,8 @@ SUBSCRIPTION = '''
                     "pattern": "^(.*)$"
                 },
                 "author": {
-                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/author",
+                    "$id": "#/properties/target_options/properties/
+                    dataset_metadata/properties/author",
                     "type": "string",
                     "title": "The dataset_metadata author Schema",
                     "default": "",
@@ -289,7 +294,8 @@ SUBSCRIPTION = '''
                     "pattern": "^(.*)$"
                 },
                 "private": {
-                    "$id": "#/properties/target_options/properties/dataset_metadata/properties/private",
+                    "$id": "#/properties/target_options/properties/
+                    dataset_metadata/properties/private",
                     "type": "boolean",
                     "title": "The dataset_metadata private Schema",
                     "default": "",
@@ -316,7 +322,8 @@ SUBSCRIPTION = '''
             },
             "properties": {
                 "title": {
-                    "$id": "#/properties/target_options/properties/resource_metadata/properties/title",
+                    "$id": "#/properties/target_options/properties/
+                    resource_metadata/properties/title",
                     "type": "string",
                     "title": "The resource_metadata title Schema",
                     "default": "",
@@ -326,7 +333,8 @@ SUBSCRIPTION = '''
                     "pattern": "^(.*)$"
                 },
                 "name": {
-                    "$id": "#/properties/target_options/properties/resource_metadata/properties/name",
+                    "$id": "#/properties/target_options/properties/
+                    resource_metadata/properties/name",
                     "type": "string",
                     "title": "The resource_metadata name Schema",
                     "default": "",
@@ -336,7 +344,8 @@ SUBSCRIPTION = '''
                     "pattern": "^(.*)$"
                 },
                 "description": {
-                    "$id": "#/properties/target_options/properties/resource_metadata/properties/description",
+                    "$id": "#/properties/target_options/properties
+                    /resource_metadata/properties/description",
                     "type": "string",
                     "title": "The resource_metadata description Schema",
                     "default": "",
