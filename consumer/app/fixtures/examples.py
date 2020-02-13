@@ -44,13 +44,8 @@ SUBSCRIPTION = {
             'owner_org': 'eHA ',
             'notes': 'Some description',
             'author': 'eHealth Africa',
-            'private': False,
-        },
-        'resource_metadata': {
-            'title': 'Sensor data',
-            'description': 'Sensor data from wind turbines',
-            'name': 'sensor-data'
-        },
+            'private': False
+        }
     }
 }
 

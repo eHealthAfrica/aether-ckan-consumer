@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
-# Copyright (C) 2020 by eHealth Africa : http://www.eHealthAfrica.org
+# Copyright (C) 2019 by eHealth Africa : http://www.eHealthAfrica.org
 #
 # See the NOTICE file distributed with this work for additional information
 # regarding copyright ownership.
@@ -18,9 +18,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-set -Eeuo pipefail
+set -Euo pipefail
 
-docker-compose -f ./docker-compose-test.yml up -d ckan
-scripts/run_unit_tests.sh
-scripts/run_integration_tests.sh
-docker-compose -f ./docker-compose-test.yml down
+pushd ckan
+docker-compose kill
+docker-compose down -v
+popd
+
+docker network rm ckan_bootstrap_net || true

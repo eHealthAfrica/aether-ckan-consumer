@@ -8,6 +8,5 @@
     "aether_masking_schema_emit_level": "false",
     "heartbeat.interval.ms": 2500,
     "session.timeout.ms": 18000,
-    "request.timeout.ms": 20000,
-    "bootstrap.servers": "kafka-test:29092"
+    "request.timeout.ms": 20000
 }

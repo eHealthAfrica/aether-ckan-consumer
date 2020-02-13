@@ -52,6 +52,7 @@ from app import consumer
 
 CONSUMER_CONFIG = config.consumer_config
 KAFKA_CONFIG = config.get_kafka_config()
+KAFKA_ADMIN_CONFIG = config.get_kafka_admin_config()
 
 LOG = get_logger('FIXTURE')
 
@@ -1536,3 +1537,89 @@ ANNOTATED_SCHEMA = {
     ],
     'namespace': 'org.ehealthafrica.aether.odk.xforms.Mysurvey'
 }
+
+TEST_SIMPLE_SCHEMA = {
+    'name': 'simpletest',
+    'fields': [
+        {
+            'default': 'rapidtest_start',
+            'doc': 'xForm ID',
+            'name': '_id',
+            'namespace': 'Rapidtest_Start_2019012807',
+            'type': [
+                'None',
+                'string'
+            ]
+        },
+        {
+            'default': '2019012807',
+            'doc': 'xForm version',
+            'name': '_version',
+            'namespace': 'Rapidtest_Start_2019012807',
+            'type': [
+                'None',
+                'string'
+            ]
+        }
+    ]
+}
+
+TEST_LIST_SIMPLE_SCHEMAS = [
+    {
+        'name': 'simpletest-1',
+        'aetherBaseSchema': True,
+        'fields': [
+            {
+                'default': 'rapidtest_start',
+                'doc': 'xForm ID',
+                'name': '_id',
+                'namespace': 'Rapidtest_Start_2019012807',
+                'type': [
+                    'None',
+                    'string'
+                ]
+            },
+            {
+                'default': '2019012807',
+                'doc': 'xForm version',
+                'name': '_version',
+                'namespace': 'Rapidtest_Start_2019012807',
+                'type': [
+                    'None',
+                    'string'
+                ]
+            }
+        ]
+    },
+    {
+        'name': 'simpletest-2',
+        'aetherBaseSchema': True,
+        'fields': [
+            {
+                'default': '2019012807',
+                'doc': 'xForm _extra',
+                'name': '_extra',
+                'namespace': 'Rapidtest_Start_2019012807',
+                'type': [
+                    'None',
+                    'int'
+                ]
+            }
+        ]
+    },
+    {
+        'name': 'simpletest-3',
+        'fields': [
+            {
+                'default': '2019012807',
+                'doc': 'xForm _extra',
+                'name': '_new',
+                'namespace': 'Rapidtest_Start_2019012807',
+                'type': [
+                    'None',
+                    'bool'
+                ]
+            }
+        ]
+    }
+]

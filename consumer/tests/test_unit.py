@@ -21,8 +21,26 @@
 import os
 import pytest
 
-from . import KAFKA_CONFIG  # noqa # get all test assets from tests/__init__.py
-from unittest import TestCase
+from . import (
+    KAFKA_CONFIG,
+    KAFKA_ADMIN_CONFIG,
+    CONSUMER_CONFIG,
+    CKANConsumer,
+    AUTOGEN_SCHEMA,
+    TEST_LIST_SIMPLE_SCHEMAS,
+    TEST_SIMPLE_SCHEMA,
+ ) # noqa # get all test assets from tests/__init__.py
+
+from app.fixtures import examples
+from app.utils import (
+    extract_fields_from_schema,
+    prepare_fields_for_resource,
+    is_field_primitive_type,
+    avroToPostgresPrimitiveTypes,
+)
+from app.artifacts import (
+    CKANInstance
+)
 
 # Test Suite contains both unit and integration tests
 # Unit tests can be run on their own from the root directory
@@ -33,16 +51,35 @@ from unittest import TestCase
 # `pytest -m unit`
 # to run integration tests / all tests run the test_all.sh script from the /tests directory.
 
+@pytest.mark.unit
+def test__get_config_alias():
+    ckan_servers = KAFKA_CONFIG.get('bootstrap.servers')
+    assert(ckan_servers is not None)
+    args = KAFKA_CONFIG.copy()
+    bootstrap = 'bootstrap.servers'.upper()
+    assert(bootstrap in args)
+    assert(args.get(bootstrap) == os.environ.get('KAFKA_URL'))
+    assert(args.get('KAFKA_URL') is None)
 
-class ConsumerTest(TestCase):
 
-    @pytest.mark.unit
-    @pytest.mark.integration
-    def test__get_config_alias(self):
-        ckan_servers = KAFKA_CONFIG.get('bootstrap.servers')
-        self.assertIsNotNone(ckan_servers)
-        args = KAFKA_CONFIG.copy()
-        bootstrap = 'bootstrap.servers'.upper()
-        self.assertIn(bootstrap, args)
-        self.assertEqual(args.get(bootstrap), os.environ.get('KAFKA_URL'))
-        self.assertIsNone(args.get('KAFKA_URL'))
+@pytest.mark.unit
+def test__utils():
+    fields, definition_names = extract_fields_from_schema(TEST_SIMPLE_SCHEMA)
+    assert(len(fields) == 2)
+    assert(len(definition_names) == 0)
+    resource_types = prepare_fields_for_resource(fields, definition_names)
+    for _type in resource_types:
+        assert(_type['type'] not in avroToPostgresPrimitiveTypes)
+
+    fields, definition_names = extract_fields_from_schema(TEST_LIST_SIMPLE_SCHEMAS)
+    assert(len(fields) == 3)
+    assert(len(definition_names) == 1)
+    assert('int' in fields[2]['type'])
+    resource_types = prepare_fields_for_resource(fields, definition_names)
+    for _type in resource_types:
+        assert(_type['type'] not in avroToPostgresPrimitiveTypes)
+
+    fields, definition_names = extract_fields_from_schema(AUTOGEN_SCHEMA)
+    resource_types = prepare_fields_for_resource(fields, definition_names)
+    for _type in resource_types:
+        assert(_type['type'] not in avroToPostgresPrimitiveTypes)
