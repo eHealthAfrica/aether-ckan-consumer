@@ -103,7 +103,7 @@ Using the consumer API usually on `http://localhost:9009`, register the followin
             "owner_org": "eHA",
             "notes": "Some description",
             "author": "eHealth Africa",
-            "private": False
+            "private": false
         }
     }
 }
