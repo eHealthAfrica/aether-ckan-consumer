@@ -28,14 +28,12 @@ test_flake8() {
 test_unit() {
     $PYTEST -m unit
     cat /code/conf/extras/good_job.txt
-    rm -R .pytest_cache || true
     rm -rf tests/__pycache__ || true
 }
 
 test_integration() {
     $PYTEST -m integration
     cat /code/conf/extras/good_job.txt
-    rm -R .pytest_cache || true
     rm -rf tests/__pycache__ || true
 }
 

@@ -14,8 +14,26 @@ services:
       CKAN_CONSUMER_CONFIG_PATH: "/code/conf/consumer/consumer.json"
       CKAN_CONSUMER_KAFKA_CONFIG_PATH: "/code/conf/consumer/kafka.json"
       LOG_LEVEL: "DEBUG"
-      CONSUMER_PORT: 9009
+      EXPOSE_PORT: 9009
+      CONSUMER_NAME: 'CKAN-CONSUMER'
+
+      REDIS_DB: 2
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redispassword
     networks:
       - aether
     ports:
       - 9009:9009
+
+  redis:
+    image: redis:alpine
+    command: >
+      redis-server
+      --requirepass redispassword
+      --notify-keyspace-events KEA
+      --appendonly yes
+      --auto-aof-rewrite-percentage 100
+      --auto-aof-rewrite-min-size 64mb
+    networks:
+      - aether
