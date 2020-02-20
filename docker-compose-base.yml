@@ -1,0 +1,12 @@
+version: "2.1"
+services:
+
+  ckan-consumer-base:
+    build: consumer
+    image: aether-ckan-consumer
+    stdin_open: true
+    volumes:
+      - ./consumer:/code
+    environment:
+      PYTHONUNBUFFERED: 0
+    command: start

@@ -20,35 +20,16 @@
 #
 set -Eeuo pipefail
 
-# Try to create the common aether network if it doesn't exist.
-{
-    docker network create aether_internal
-} || { # catch
-    echo "aether_internal is ready."
-}
-
 # Build docker images
 IMAGE_REPO='ehealthafrica'
-CORE_APPS=( ckan-consumer )
-CORE_COMPOSE='docker-compose.yml'
-VERSION=$TRAVIS_TAG
+COMPOSE_PATH='docker-compose.yml'
+VERSION='local'
 
-release_app () {
-  APP_NAME=$1
-  COMPOSE_PATH=$2
-  AETHER_APP="aether-${1}"
-  echo "$AETHER_APP"
-  echo "version: $VERSION"
-  echo "Building Docker image ${IMAGE_REPO}/${AETHER_APP}:${VERSION}"
-  docker-compose -f $COMPOSE_PATH build --build-arg VERSION=$VERSION $APP_NAME
+APP_NAME="ckan-consumer"
+AETHER_APP="aether-${APP_NAME}"
+echo "$AETHER_APP"
+echo "version: $VERSION"
+echo "Building Docker image ${IMAGE_REPO}/${AETHER_APP}:${VERSION}"
+docker-compose -f $COMPOSE_PATH build --build-arg VERSION=$VERSION $APP_NAME
 
-  docker tag ${AETHER_APP} "${IMAGE_REPO}/${AETHER_APP}:${VERSION}"
-  echo "Pushing Docker image ${IMAGE_REPO}/${AETHER_APP}:${VERSION}"
-  docker push "${IMAGE_REPO}/${AETHER_APP}:${VERSION}"
-
-}
-
-for APP in "${CORE_APPS[@]}"
-do
-  release_app $APP $CORE_COMPOSE
-done
+docker tag ${AETHER_APP} "${IMAGE_REPO}/${AETHER_APP}:${VERSION}"

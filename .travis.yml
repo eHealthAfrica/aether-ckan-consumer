@@ -1,18 +1,44 @@
 language: python
 python:
-  - "2.7"
+  - "3.7"
 services:
 - docker
 cache: pip
 before_script:
 - docker login -u ehealthafricadevops -p $DOCKER_HUB_PASSWORD
-install: bash bin/travis-build.bash
-script: sh bin/travis-run.sh
 
-deploy:
-- provider: script
-  script: "./scripts/release.sh"
-  skip_cleanup: true
-  on:
-    all_branches: true
-    condition: ($TRAVIS_BRANCH =~ ^release\-[0-9]+\.[0-9]+[\.0-9]*$) || ($TRAVIS_TAG =~ ^[0-9]+\.[0-9]+[\.0-9]*$)
+# build only the master branch or tags like #.#.#
+branches:
+  only:
+    - master
+    - /^[0-9]+(\.[0-9]+){2}$/
+    - /^release\-[0-9]+\.[0-9]+$/
+
+# define stages and their execution order
+stages:
+  - name: test
+
+  # release only in:
+  #   - branch   master
+  #   - tag      #.#.#
+  #   - never in forks or pull requests
+  - name: release
+    if: |
+      fork IS false AND \
+      type != pull_request AND \
+      ((branch = master) OR \
+      (tag =~ ^[0-9]+(\.[0-9]+){2}$))
+
+jobs:
+  fast_finish: true
+  include:
+
+    - name: "Test"
+      stage: test
+      script: "./scripts/run_travis.sh"
+
+    - name: "Release"
+      stage: release
+      script: "./scripts/release.sh"
+
+install: true

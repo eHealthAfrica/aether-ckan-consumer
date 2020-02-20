@@ -1,3 +1,0 @@
-[submodule "example/aether-bootstrap"]
-	path = example/aether-bootstrap
-	url = git@github.com:eHealthAfrica/aether-bootstrap.git

@@ -1,7 +1,0 @@
-aet.consumer==0.9.1
-jsonschema==2.6.0
-requests==2.18.4
-kafka-python==1.4.2
-avro==1.8.2
-sqlalchemy==1.2.0
-ckanapi==4.1

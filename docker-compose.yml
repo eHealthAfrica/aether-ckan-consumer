@@ -1,25 +1,39 @@
-version: "3"
+version: "2.1"
 
 networks:
   aether:
     external:
-      name: aether_internal
-  ckan-net:
-    external:
-      name: ckan_ckan_net
+      name: aether_bootstrap_net
 
 services:
   ckan-consumer:
-    build: .
-    image: aether-ckan-consumer
-    env_file:
-      - .env
-    # Temporary set to enable access to local Kafka from outside the container.
+    extends:
+      file: docker-compose-base.yml
+      service: ckan-consumer-base
+    environment:
+      CKAN_CONSUMER_CONFIG_PATH: "/code/conf/consumer/consumer.json"
+      CKAN_CONSUMER_KAFKA_CONFIG_PATH: "/code/conf/consumer/kafka.json"
+      LOG_LEVEL: "DEBUG"
+      EXPOSE_PORT: 9009
+      CONSUMER_NAME: 'CKAN-CONSUMER'
+
+      REDIS_DB: 2
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redispassword
     networks:
       - aether
-      - ckan-net
-    environment:
-      - CONSUMER_CONF_DIR=/srv/app
-    volumes:
-      - ./config:/srv/app/config
-      - ./db/:/srv/app/db/
+    ports:
+      - 9009:9009
+
+  redis:
+    image: redis:alpine
+    command: >
+      redis-server
+      --requirepass redispassword
+      --notify-keyspace-events KEA
+      --appendonly yes
+      --auto-aof-rewrite-percentage 100
+      --auto-aof-rewrite-min-size 64mb
+    networks:
+      - aether
