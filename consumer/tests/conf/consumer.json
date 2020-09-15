@@ -1,0 +1,5 @@
+{
+    "url": "ckan:5000",
+    "name": "CKAN_CONSUMER",
+	"log_level": "debug"
+}

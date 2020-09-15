@@ -1,0 +1,85 @@
+version: "2.4"
+services:
+  consumer-test:
+    extends:
+      file: docker-compose-base.yml
+      service: ckan-consumer-base
+    environment:
+      TENANCY_HEADER: x-oauth-realm
+
+      CONSUMER_NAME: 'CKAN-TEST'
+
+      EXPOSE_PORT: 9013
+      LOG_LEVEL: "DEBUG"
+      CONSUMER_CONFIG_PATH: "/code/tests/conf/consumer.json"
+      CONSUMER_KAFKA_CONFIG_PATH: "/code/tests/conf/kafka.json"
+      CONNECT_RETRY_WAIT: 1
+      STARTUP_CONNECTION_RETRY: 3
+
+      KAFKA_URL: kafka-test:29092
+      SECURITY.PROTOCOL: SASL_SSL
+      SASL.MECHANISM: PLAIN
+      SASL.USERNAME: root
+      SASL.PASSWORD: 09049a938686107c15ed6748010e2f1b
+
+      REDIS_DB: 2
+      REDIS_HOST: localhost
+      REDIS_PORT: 6380
+      REDIS_PASSWORD: redispassword
+
+  ckan:
+    image: ehealthafrica/ckan:2.8.0-rc
+    environment:
+      # Defaults work with linked containers, change to use own Postgres, SolR, Redis or Datapusher
+      - DATASTORE_READONLY_PASSWORD=datastore
+      - DS_RO_PASS=datastore
+      - CKAN_SITE_URL=http://ckan:5000
+      - CKAN_PORT=5000
+      - CKAN_MAX_UPLOAD_SIZE_MB=20000
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan:ckan@ckanpg/ckan
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:ckan@ckanpg/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:datastore@ckanpg/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://user:redispassword@redis:6379/2
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - POSTGRES_PASSWORD=db_password
+    volumes:
+      - ./consumer/tests/ckan/ckan:/etc/ckan
+    depends_on:
+      - ckanpg
+      - solr
+      - redis
+    ports:
+      - 5000:5000
+    restart: on-failure
+
+  datapusher:
+    image: clementmouchet/datapusher
+    ports:
+      - 8800:8800
+
+  ckanpg:
+    build:
+      context: ./consumer/tests/ckan
+      dockerfile: postgresql/Dockerfile
+      args:
+        - DS_RO_PASS=datastore
+        - POSTGRES_PASSWORD=ckan
+    environment:
+      - DS_RO_PASS=datastore
+      - POSTGRES_PASSWORD=ckan
+
+  solr:
+    build:
+      context: ./consumer/tests/ckan
+      dockerfile: solr/Dockerfile
+
+  redis:
+    image: redis:alpine
+    command: >
+      redis-server
+      --requirepass redispassword
+      --notify-keyspace-events KEA
+      --appendonly yes
+      --auto-aof-rewrite-percentage 100
+      --auto-aof-rewrite-min-size 64mb

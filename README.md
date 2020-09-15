@@ -7,144 +7,194 @@ CKAN portals with data in the Datastore.
 
 ### Running the app
 
-The project is setup with Docker. It will spin up an environment with
-Python 2.7 based on Alpine and install the required dependencies.
+A CKAN portal has to be available fro the consumer to connect to. You can fine how to setup a CKAN portal [here](https://docs.ckan.org/en/2.8/maintaining/installing/index.html), or check our example of a docker-compose CKAN container `./consumer/tests/ckan`
 
-To run the app just type:
+After setting up CKAN and a CKAN user, get your [api-key](https://docs.ckan.org/en/ckan-2.7.3/api/#authentication-and-api-keys) for later use.
 
+To start the consumer run
+
+```bash
+docker-compose up
 ```
-docker-compose up --timeout 60
-```
 
-The `--timeout` argument tells Docker how many seconds to wait before it kills
-the app when it is gracefully stopped. The default is 10 seconds. This should
-be specified based on how many CKAN portals are configured, and how many
-datasets need to be feed with data. Because when the app is gracefully stopped,
- it will send all data processed from Kafka.
+The consumer api should now be accessible on [http://localhost:9009](http://localhost:9009)
 
 ### Configuration
 
-#### `config.json`
+#### `/conf/consumer/kafka.json`
 
-The Consumer can be configured via `config.json`. This is a sample of its shape
-and data:
+To setup the main consumer, the kafka.json file should match your preferred Kafka settings. This is not user facing. The consumer running assumes that you have employed topic level access control.
+
+You can also set the default masking and message filtering settings here, but if specified, the user's rules will take precedence.
 
 ```json
 {
-    "database": {
-        "url": "sqlite:////srv/app/db/consumer.db"
-    },
-    "kafka": {
-        "url": "localhost:9092"
-    },
-    "ckan_servers": [
-        {
-            "title": "Local CKAN portal",
-            "url": "http://localhost:5000",
-            "api_key": "2ef3752c-b615-405d-9627-2bf7321d4rty",
-            "datasets": [
-                {
-                    "metadata": {
-                        "title": "Dataset title",
-                        "name": "dataset-title",
-                        "owner_org": "demo-org",
-                        "notes": "Sample data"
-                    },
-                    "resources": [
-                        {
-                            "metadata": {
-                                "title": "Sensor data",
-                                "description": "Sensor data from wind turbines",
-                                "name": "sensor-data"
-                            },
-                            "topics": [
-                                {
-                                    "name": "test",
-                                    "number_of_consumers": 1
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "auto_offset_reset" : "earliest",
+    "aether_emit_flag_required" : false,
+    "aether_masking_schema_levels" : ["false", "true"],
+    "aether_masking_schema_emit_level": "false",
+    "heartbeat_interval_ms": 2500,
+    "session_timeout_ms": 18000,
+    "request_timeout_ms": 20000,
+    "consumer_timeout_ms": 17000
 }
 ```
 
-Available options are:
+#### `/conf/consumer/consumer.json`
 
-- `database`: Object storing information for local database.
-- `database.url`: URL where the database is stored.
-- `kafka`: Object storing information for Kafka.
-- `kafka.url`: The URL where Kafka is running.
-- `ckan_servers`: Array of CKAN server instances.
-- `ckan_servers.title`: Title of the CKAN server instance.
-- `ckan_servers.url`: The URL where the CKAN server instance is running.
-- `ckan_servers.api_key`: The API key used for making API calls to a CKAN
-server instance. The API key should be associated with a user that has
-privileges to create a dataset in CKAN.
-- `ckan_servers.datasets`: Array of datasets to feed data with for the CKAN
-server instance.
-- `ckan_servers.datasets.metadata`: Metadata information for the dataset that
-will be created in CKAN.
-- `ckan_servers.datasets.metadata.title`: Title of the dataset.
-- `ckan_servers.datasets.metadata.name`: Name of the dataset. Create a unique
-name for the dataset. The name should be unique per CKAN instance. For
-instance, if you want to give the name *demo-dataset* for the dataset, check
-the portal at `https://example.com/dataset/demo-dataset` to see if one already
-exists. Also, keep in mind that datasets you don't have access to (private),
-will be shown as "Not found" on the CKAN portal. So make sure the name is
-trully unique for your purpose.
-- `ckan_servers.datasets.metadata.owner_org`: Name of the organization. For
-instance, for this organization `https://example.com/organization/org-name`,
-the name of the organization is *org-name*. This name is unique per CKAN
-instance. Note that this organization must be previously created in CKAN from
-the UI.
-- `ckan_servers.datasets.metadata.notes`: Description of the dataset.
-- `ckan_servers.datasets.resources`: List of resources that should be feed with
-data.
-- `ckan_servers.datasets.resources.metadata`: Metadata information for the
-resource in CKAN.
-- `ckan_servers.datasets.resources.metadata.title`: Title of the resource.
-- `ckan_servers.datasets.resources.metadata.description`: Description of the
-resource.
-- `ckan_servers.datasets.resources.metadata.name`: Unique name of the resource.
-This name should be unique only for the dataset where it is specified, meaning
-the same name can be used when used in other dataset.
-- `ckan_servers.datasets.resources.topics`: Array of topics to pull data from
-for a dataset.
-- `ckan_servers.datasets.resources.topics.name`: Name of the topic in Kafka.
-- `ckan_servers.datasets.resources.topics.number_of_consumers`: Number of
-consumers to instantiate for the specified topic. Usually this should be set to
- 1, but if the volume of data that comes from a topic increases, it should be
-increased. (Default: 1)
+The consumer takes data from kafka and groups them into `datasets` on CKAN. This file defines the defaults for datasets if none is provided by the user during subscription.
 
-This configuration file is validated against `config.schema`, which is a JSON
-Schema file. This makes sure that data in the `config.json` file is valid, as
-well as its shape.
+```json
+{
+    "name": "CKAN_CONSUMER",
+    "metadata": {
+        "author": "eHealth Africa",
+        "author_email": "info@ehealthafrica.org",
+        "maintainer": "eHealth Africa",
+        "maintainer_email": "info@ehealthafrica.org",
+        "license_id": "cc-by",
+        "url": "https://www.ehealthafrica.org",
+        "version": "1.0",
+        "owner_org": "eHA",
+        "name": "demo-dataset-1",
+        "title": "Demo Dataset"
+    }
+}
+```
 
-#### `dataset_metadata.json`
+### Usage
 
-All datasets specified in `config.json` are created in CKAN with default
-metadata fields obtainted from `dataset_metadata.json`. They can be overriden
-per dataset through the `config.json` file, in the
-`ckan_servers.datasets.resources.metadata` object.
+As with all consumers built on the SDK, tasks are driven by a Job which has a set of Resources. In this case, a Job has a `subscription` to a topic (or wildcard) on Kafka, and sends data to a `ckan` instance. All resource examples and schemas can be found in `/consumer/app/fixtures`
 
-### Environment variables
+Using the consumer API usually on `http://localhost:9009`, register the following artefacts.
 
-In `.env`, the following variables can be changed:
+#### CKAN
 
-- `PYTHONUNBUFFERED`: Useful for debugging in development. It forces stdin,
-stdout and stderr to be totally unbuffered. It should be set to any value in
-order to work.
-- `ENVIRONMENT`: Can be set to *development* or *production*. Default is
-*development*.
+(post to `/ckan/add` as `json`)
+
+```json
+{
+    "id": "ckan-id",
+    "name": "CKAN Instance",
+    "url": "http://ckan:5000",
+    "key": `[your-ckan-api-key]`
+}
+```
+
+#### Subscription
+
+(post to `/subscription/add` as `json`)
+
+```json
+{
+    "id": "sub-id",
+    "name": "Demo Subscription",
+    "topic_pattern": "*",
+    "topic_options": {
+        "masking_annotation": "@aether_masking",
+        "masking_levels": ["public", "private"],
+        "masking_emit_level": "public",
+        "filter_required": false
+    },
+    "target_options": {
+        "dataset_metadata": {
+            "title": "Pollution in Nigeria",
+            "name": "pollution-in-nigeria111",
+            "owner_org": "eHA",
+            "notes": "Some description",
+            "author": "eHealth Africa",
+            "private": false
+        }
+    }
+}
+```
+
+#### Job
+
+Finally we, tie it together with a Job that references the above artifacts by ID. (post to `/job/add` as `json`)
+
+```json
+{
+    "id": "job-id",
+    "name": "CKAN Consumer Job",
+    "ckan": "ckan-id",
+    "subscription": ["sub-id"]
+}
+```
+
+### Environment Variables
+
+The following settings can be changed in `docker-compose.yml > services > ckan-consumer > environment`:
+ -  `CONSUMER_NAME`: The name of the consumer
+ -  `EXPOSE_PORT`: Port to access consumer API
+ -  `ADMIN_USER`: Username for API authentication
+ -  `ADMIN_PW`: Password for API authentication
+
+ -  `REDIS_DB`: Redis database name
+ -  `REDIS_HOST`: Host to redis instance
+ -  `REDIS_PORT`: Redis port
+ -  `REDIS_PASSWORD`: Redis password
+
+
+### Control and Artifact Functions
+
+The Aether Consumer SDK allows exposure of functionality on a per Job or per Resource basis. You can query for a list of available functions on any of the artifacts by hitting its describe endpoint. For example; /job/describe yields:
+
+```json
+[
+  {
+    "doc": "Described the available methods exposed by this resource type",
+    "method": "describe",
+    "signature": "(*args, **kwargs)"
+  },
+  {
+    "doc": "Returns the schema for instances of this resource",
+    "method": "get_schema",
+    "signature": "(*args, **kwargs)"
+  },
+  {
+    "doc": "Return a lengthy validations.\n{'valid': True} on success\n{'valid': False, 'validation_errors': [errors...]} on failure",
+    "method": "validate_pretty",
+    "signature": "(definition, *args, **kwargs)"
+  },
+  {
+    "doc": "Temporarily Pause a job execution.\nWill restart if the system resets. For a longer pause, remove the job via DELETE",
+    "method": "pause",
+    "signature": "(self, *args, **kwargs)"
+  },
+  {
+    "doc": "Resume the job after pausing it.",
+    "method": "resume",
+    "signature": "(self, *args, **kwargs)"
+  },
+  {
+    "doc": null,
+    "method": "get_status",
+    "signature": "(self, *args, **kwargs) -> Union[Dict[str, Any], str]"
+  },
+  {
+    "doc": "A list of the last 100 log entries from this job in format\n[\n    (timestamp, log_level, message),\n    (timestamp, log_level, message),\n    ...\n]",
+    "method": "get_logs",
+    "signature": "(self, *arg, **kwargs)"
+  },
+  {
+    "doc": "Get a list of topics to which the job can subscribe.\nYou can also use a wildcard at the end of names like:\nName* which would capture both Name1 && Name2, etc",
+    "method": "list_topics",
+    "signature": "(self, *args, **kwargs)"
+  },
+  {
+    "doc": "A List of topics currently subscribed to by this job",
+    "method": "list_subscribed_topics",
+    "signature": "(self, *arg, **kwargs)"
+  }
+]
+```
 
 ### Running the tests
 
 To run the tests type the following command which also checks for PEP8 errors:
 
 ```
-docker-compose -f docker-compose.test.yml up --build
+./scripts/run_unit_tests.sh
+./scripts/run_integration_tests.sh
 ```
