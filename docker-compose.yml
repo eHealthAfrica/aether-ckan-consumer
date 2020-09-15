@@ -1,4 +1,4 @@
-version: "2.1"
+version: "2.4"
 
 networks:
   aether:
@@ -11,8 +11,8 @@ services:
       file: docker-compose-base.yml
       service: ckan-consumer-base
     environment:
-      CKAN_CONSUMER_CONFIG_PATH: "/code/conf/consumer/consumer.json"
-      CKAN_CONSUMER_KAFKA_CONFIG_PATH: "/code/conf/consumer/kafka.json"
+      CONSUMER_CONFIG_PATH: "/code/conf/consumer/consumer.json"
+      CONSUMER_KAFKA_CONFIG_PATH: "/code/conf/consumer/kafka.json"
       LOG_LEVEL: "DEBUG"
       EXPOSE_PORT: 9009
       CONSUMER_NAME: 'CKAN-CONSUMER'
