@@ -33,8 +33,14 @@ kafka_admin_uses = [
 
 
 def load_config():
-    CONSUMER_CONFIG_PATH = os.environ.get('CKAN_CONSUMER_CONFIG_PATH', None)
-    KAFKA_CONFIG_PATH = os.environ.get('CKAN_CONSUMER_KAFKA_CONFIG_PATH', None)
+    # Use generic config path environment variable names
+    # but also keep old ones for legacy deployments
+    CONSUMER_CONFIG_PATH = os.environ.get(
+        'CONSUMER_CONFIG_PATH',
+        os.environ.get('CKAN_CONSUMER_CONFIG_PATH', None))
+    KAFKA_CONFIG_PATH = os.environ.get(
+        'CONSUMER_KAFKA_CONFIG_PATH',
+        os.environ.get('CKAN_CONSUMER_KAFKA_CONFIG_PATH', None))
     global consumer_config
     consumer_config = Settings(file_path=CONSUMER_CONFIG_PATH)
     global kafka_config
